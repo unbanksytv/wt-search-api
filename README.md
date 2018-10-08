@@ -1,2 +1,6 @@
 # wt-search-api
-Search engine built on top of Winding Tree platform
+
+Work in progress.
+
+![Proposed architecture](https://github.com/windingtree/wt-search-api/raw/master/docs/wt-search-api.png "Proposed architecture")
+
