@@ -32,23 +32,26 @@ class Fetcher {
     }, options);
   }
 
-  async _appendNextPage (next, previousItems) {
-    return this.fetchHotelIds(next)
+  async _appendNextPage (maxPages, counter, next, previousItems) {
+    if (counter >= maxPages) {
+      return {
+        ids: previousItems,
+        next: next,
+      };
+    }
+    return this._fetchHotelIds(maxPages, ++counter, next)
       .then((nextItems) => {
-        return previousItems.concat(nextItems);
+        return {
+          ids: previousItems.concat(nextItems.ids),
+          next: nextItems.next,
+        };
       });
   }
 
-  async fetchHotelIds (url) {
-    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
-    if (url && !url.match(expectedUrl)) {
-      throw new FetcherError(`${url} does not look like hotels list URI`);
-    }
-
-    const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
+  async _fetchHotelIds (maxPages, counter, url) {
     return request({
       method: 'GET',
-      uri: url || defaultUrl,
+      uri: url,
       json: true,
       simple: false,
       resolveWithFullResponse: true,
@@ -59,10 +62,22 @@ class Fetcher {
       const items = response.body.items,
         mappedItems = items.map((a) => a.id);
       if (response.body.next) {
-        return this._appendNextPage(response.body.next, mappedItems);
+        return this._appendNextPage(maxPages, counter, response.body.next, mappedItems);
       }
-      return mappedItems;
+      return {
+        ids: mappedItems,
+        next: response.body.next,
+      };
     });
+  }
+
+  async fetchHotelIds (maxPages, url) {
+    const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
+    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
+    if (url && !url.match(expectedUrl)) {
+      throw new FetcherError(`${url} does not look like hotels list URI`);
+    }
+    return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
   };
 /*
   fetchHotelDataUris (hotelId) {

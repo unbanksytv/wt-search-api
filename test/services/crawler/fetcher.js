@@ -48,10 +48,11 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy2' },
           ],
         });
-      const ids = await fetcher.fetchHotelIds();
-      assert.equal(ids.length, 2);
-      assert.equal(ids[0], '0xdummy1');
-      assert.equal(ids[1], '0xdummy2');
+      const result = await fetcher.fetchHotelIds();
+      assert.equal(result.ids.length, 2);
+      assert.equal(result.ids[0], '0xdummy1');
+      assert.equal(result.ids[1], '0xdummy2');
+      assert.equal(result.next, undefined);
     });
 
     it('should automatically resolve next if present', async () => {
@@ -75,15 +76,16 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy7' },
           ],
         });
-      const ids = await fetcher.fetchHotelIds();
-      assert.equal(ids.length, 7);
-      assert.equal(ids[0], '0xdummy1');
-      assert.equal(ids[1], '0xdummy2');
-      assert.equal(ids[2], '0xdummy3');
-      assert.equal(ids[3], '0xdummy4');
-      assert.equal(ids[4], '0xdummy5');
-      assert.equal(ids[5], '0xdummy6');
-      assert.equal(ids[6], '0xdummy7');
+      const result = await fetcher.fetchHotelIds();
+      assert.equal(result.ids.length, 7);
+      assert.equal(result.ids[0], '0xdummy1');
+      assert.equal(result.ids[1], '0xdummy2');
+      assert.equal(result.ids[2], '0xdummy3');
+      assert.equal(result.ids[3], '0xdummy4');
+      assert.equal(result.ids[4], '0xdummy5');
+      assert.equal(result.ids[5], '0xdummy6');
+      assert.equal(result.ids[6], '0xdummy7');
+      assert.equal(result.next, undefined);
     });
 
     it('should call an url from an argument', async () => {
@@ -95,19 +97,71 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy7' },
           ],
         });
-      const ids = await fetcher.fetchHotelIds(`${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`);
-      assert.equal(ids.length, 2);
-      assert.equal(ids[0], '0xdummy6');
-      assert.equal(ids[1], '0xdummy7');
+      const result = await fetcher.fetchHotelIds(undefined, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`);
+      assert.equal(result.ids.length, 2);
+      assert.equal(result.ids[0], '0xdummy6');
+      assert.equal(result.ids[1], '0xdummy7');
+      assert.equal(result.next, undefined);
     });
 
     it('should throw if url in an argument is weird', async () => {
       try {
-        await fetcher.fetchHotelIds('https://google.com/look-for-travel');
+        await fetcher.fetchHotelIds(undefined, 'https://google.com/look-for-travel');
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /does not look like hotels list/i);
       }
+    });
+
+    it('should respect maxPages', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy1' },
+            { id: '0xdummy2' },
+            { id: '0xdummy3' },
+            { id: '0xdummy4' },
+            { id: '0xdummy5' },
+          ],
+          next: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`,
+        });
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id&startWith=0xdummy6`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy6' },
+            { id: '0xdummy7' },
+            { id: '0xdummy8' },
+            { id: '0xdummy9' },
+            { id: '0xdummy10' },
+          ],
+          next: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy11`,
+        });
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id&startWith=0xdummy11`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy11' },
+            { id: '0xdummy12' },
+            { id: '0xdummy13' },
+            { id: '0xdummy14' },
+            { id: '0xdummy15' },
+          ],
+        });
+      const result = await fetcher.fetchHotelIds(2);
+      assert.equal(result.ids.length, 10);
+      assert.equal(result.ids[0], '0xdummy1');
+      assert.equal(result.ids[1], '0xdummy2');
+      assert.equal(result.ids[2], '0xdummy3');
+      assert.equal(result.ids[3], '0xdummy4');
+      assert.equal(result.ids[4], '0xdummy5');
+      assert.equal(result.ids[5], '0xdummy6');
+      assert.equal(result.ids[6], '0xdummy7');
+      assert.equal(result.ids[7], '0xdummy8');
+      assert.equal(result.ids[8], '0xdummy9');
+      assert.equal(result.ids[9], '0xdummy10');
+      assert.equal(result.next, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy11`);
     });
   });
 });
