@@ -1,5 +1,7 @@
 # wt-search-api
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/windingtree/wt-search-api.svg)](https://greenkeeper.io/)
+
 Work in progress. Discussion on https://groups.google.com/forum/#!topic/windingtree/J_6aRddPVWY
 
 ![Proposed architecture](https://github.com/windingtree/wt-search-api/raw/master/docs/wt-search-api.png "Proposed architecture")
