@@ -10,9 +10,7 @@
     "start": "node src/index.js",
     "dev": "WT_CONFIG=dev node src/index.js",
     "createdb-dev": "WT_CONFIG=dev node management/createdb.js",
-    "createdb": "node management/createdb.js",
-    "_deploy-playground": "now -e NODE_ENV=production --team windingtree --token $NOW_TOKEN --docker --public --local-config=now-playground.json",
-    "_alias-playground": "now alias --team windingtree --token=$NOW_TOKEN --local-config=now-playground.json"
+    "createdb": "node management/createdb.js"
   },
   "repository": {
     "type": "git",
