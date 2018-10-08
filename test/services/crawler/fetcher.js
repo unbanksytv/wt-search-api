@@ -88,6 +88,66 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.next, undefined);
     });
 
+    it('should get a list of errors from readApiUrl', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy1' },
+            { id: '0xdummy2' },
+          ],
+          errors: [
+            { data: { id: '0xerror1' } },
+            { data: { id: '0xerror2' } },
+          ],
+        });
+      const result = await fetcher.fetchHotelIds();
+      assert.equal(result.ids.length, 2);
+      assert.equal(result.errors.length, 2);
+      assert.equal(result.errors[0], '0xerror1');
+      assert.equal(result.errors[1], '0xerror2');
+      assert.equal(result.next, undefined);
+    });
+
+    it('should pass on lists if next is present', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy1' },
+            { id: '0xdummy2' },
+            { id: '0xdummy3' },
+            { id: '0xdummy4' },
+            { id: '0xdummy5' },
+          ],
+          errors: [
+            { data: { id: '0xerror1' } },
+            { data: { id: '0xerror2' } },
+          ],
+          next: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`,
+        });
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id&startWith=0xdummy6`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy6' },
+            { id: '0xdummy7' },
+          ],
+          errors: [
+            { data: { id: '0xerror3' } },
+            { data: { id: '0xerror4' } },
+          ],
+        });
+      const result = await fetcher.fetchHotelIds();
+      assert.equal(result.ids.length, 7);
+      assert.equal(result.errors.length, 4);
+      assert.equal(result.errors[0], '0xerror1');
+      assert.equal(result.errors[1], '0xerror2');
+      assert.equal(result.errors[2], '0xerror3');
+      assert.equal(result.errors[3], '0xerror4');
+      assert.equal(result.next, undefined);
+    });
+
     it('should call an url from an argument', async () => {
       nock(readApiUrl)
         .get(`/hotels?limit=${limit}&fields=id&startWith=0xdummy6`)
@@ -162,6 +222,32 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.ids[8], '0xdummy9');
       assert.equal(result.ids[9], '0xdummy10');
       assert.equal(result.next, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy11`);
+    });
+
+    it('should throw on non-success from readApiUrl', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(500);
+      try {
+        await fetcher.fetchHotelIds();
+        throw new Error('should not have been called');
+      } catch (e) {
+        assert.match(e.message, /responded with 500/i);
+      }
+    });
+
+    it('should throw on unknown data format from readApiUrl', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(200, {
+          hotels: [],
+        });
+      try {
+        await fetcher.fetchHotelIds();
+        throw new Error('should not have been called');
+      } catch (e) {
+        assert.match(e.message, /did not respond with items list/i);
+      }
     });
   });
 });

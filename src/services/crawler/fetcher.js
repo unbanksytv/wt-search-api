@@ -19,6 +19,7 @@ const request = require('request-promise-native');
 ]; */
 
 class FetcherError extends Error {}
+class FetcherRemoteError extends Error {}
 class FetcherInitializationError extends FetcherError {}
 
 class Fetcher {
@@ -32,17 +33,12 @@ class Fetcher {
     }, options);
   }
 
-  async _appendNextPage (maxPages, counter, next, previousItems) {
-    if (counter >= maxPages) {
-      return {
-        ids: previousItems,
-        next: next,
-      };
-    }
-    return this._fetchHotelIds(maxPages, ++counter, next)
+  async _appendNextPage (maxPages, counter, previousResult) {
+    return this._fetchHotelIds(maxPages, counter, previousResult.next)
       .then((nextItems) => {
         return {
-          ids: previousItems.concat(nextItems.ids),
+          ids: previousResult.ids.concat(nextItems.ids),
+          errors: previousResult.errors ? previousResult.errors.concat(nextItems.errors) : nextItems.errors,
           next: nextItems.next,
         };
       });
@@ -55,19 +51,28 @@ class Fetcher {
       json: true,
       simple: false,
       resolveWithFullResponse: true,
+      timeout: this.config.timeout,
     }).then((response) => {
-      // TODO handle format errors (no items present)
-      // TODO handle network errors
-      // TODO somehow handle response.body.errors
-      const items = response.body.items,
-        mappedItems = items.map((a) => a.id);
-      if (response.body.next) {
-        return this._appendNextPage(maxPages, counter, response.body.next, mappedItems);
+      if (response.statusCode > 299) {
+        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
       }
-      return {
-        ids: mappedItems,
-        next: response.body.next,
-      };
+      if (!response.body || !response.body.items) {
+        throw new FetcherRemoteError(`${url} did not respond with items list as expected.`);
+      }
+      const items = response.body.items,
+        mappedItems = items.map((a) => a.id),
+        mappedErrors = response.body.errors && response.body.errors.map((a) => a.data && a.data.id).filter((f) => !!f),
+        result = {
+          ids: mappedItems,
+          errors: mappedErrors,
+          next: response.body.next,
+        };
+      if (response.body.next && (!maxPages || (maxPages && counter < maxPages))) {
+        return this._appendNextPage(maxPages, ++counter, result);
+      }
+      return result;
+    }).catch((e) => {
+      throw new FetcherRemoteError(e);
     });
   }
 
