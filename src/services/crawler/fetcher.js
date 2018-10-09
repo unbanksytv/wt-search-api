@@ -35,18 +35,7 @@ class Fetcher {
     }, options);
   }
 
-  async _appendNextPage (maxPages, counter, previousResult) {
-    return this._fetchHotelIds(maxPages, counter, previousResult.next)
-      .then((nextItems) => {
-        return {
-          ids: previousResult.ids.concat(nextItems.ids),
-          errors: previousResult.errors ? previousResult.errors.concat(nextItems.errors) : nextItems.errors,
-          next: nextItems.next,
-        };
-      });
-  }
-
-  async _fetchHotelIds (maxPages, counter, url) {
+  _getSingleUrl (url, success) {
     return request({
       method: 'GET',
       uri: url,
@@ -58,6 +47,25 @@ class Fetcher {
       if (response.statusCode > 299) {
         throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
       }
+      return success(response);
+    }).catch((e) => {
+      throw new FetcherRemoteError(e);
+    });
+  }
+
+  _appendNextPage (maxPages, counter, previousResult) {
+    return this._fetchHotelIds(maxPages, counter, previousResult.next)
+      .then((nextItems) => {
+        return {
+          ids: previousResult.ids.concat(nextItems.ids),
+          errors: previousResult.errors ? previousResult.errors.concat(nextItems.errors) : nextItems.errors,
+          next: nextItems.next,
+        };
+      });
+  }
+
+  _fetchHotelIds (maxPages, counter, url) {
+    return this._getSingleUrl(url, (response) => {
       if (!response.body || !response.body.items) {
         throw new FetcherRemoteError(`${url} did not respond with items list as expected.`);
       }
@@ -73,12 +81,10 @@ class Fetcher {
         return this._appendNextPage(maxPages, ++counter, result);
       }
       return result;
-    }).catch((e) => {
-      throw new FetcherRemoteError(e);
     });
   }
 
-  async fetchHotelList (maxPages, url) {
+  fetchHotelList (maxPages, url) {
     const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
     const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
     if (url && !url.match(expectedUrl)) {
@@ -87,84 +93,29 @@ class Fetcher {
     return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
   };
 
-  fetchDataUris (hotelId) {
+  _fetchHotelResource (hotelId, url) {
     if (!hotelId) {
       throw new FetcherError('hotelId is required');
     }
-    const url = `${this.config.readApiUrl}/hotels/${hotelId}/dataUris`;
-    return request({
-      method: 'GET',
-      uri: url,
-      json: true,
-      simple: false,
-      resolveWithFullResponse: true,
-      timeout: this.config.timeout,
-    }).then((response) => {
-      if (response.statusCode > 299) {
-        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
-      }
+    return this._getSingleUrl(url, (response) => {
       return response.body;
     });
+  }
+
+  fetchDataUris (hotelId) {
+    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/dataUris`);
   };
 
   fetchDescription (hotelId) {
-    if (!hotelId) {
-      throw new FetcherError('hotelId is required');
-    }
-    const url = `${this.config.readApiUrl}/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`;
-    return request({
-      method: 'GET',
-      uri: url,
-      json: true,
-      simple: false,
-      resolveWithFullResponse: true,
-      timeout: this.config.timeout,
-    }).then((response) => {
-      if (response.statusCode > 299) {
-        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
-      }
-      return response.body;
-    });
+    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`);
   };
 
   fetchRatePlans (hotelId) {
-    if (!hotelId) {
-      throw new FetcherError('hotelId is required');
-    }
-    const url = `${this.config.readApiUrl}/hotels/${hotelId}/ratePlans`;
-    return request({
-      method: 'GET',
-      uri: url,
-      json: true,
-      simple: false,
-      resolveWithFullResponse: true,
-      timeout: this.config.timeout,
-    }).then((response) => {
-      if (response.statusCode > 299) {
-        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
-      }
-      return response.body;
-    });
+    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/ratePlans`);
   };
 
   fetchAvailability (hotelId) {
-    if (!hotelId) {
-      throw new FetcherError('hotelId is required');
-    }
-    const url = `${this.config.readApiUrl}/hotels/${hotelId}/availability`;
-    return request({
-      method: 'GET',
-      uri: url,
-      json: true,
-      simple: false,
-      resolveWithFullResponse: true,
-      timeout: this.config.timeout,
-    }).then((response) => {
-      if (response.statusCode > 299) {
-        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
-      }
-      return response.body;
-    });
+    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/availability`);
   };
 }
 
