@@ -1,7 +1,8 @@
 /* eslint-env mocha */
 const { assert } = require('chai');
 const nock = require('nock');
-const { Fetcher, FetcherInitializationError } = require('../../../src/services/crawler/fetcher');
+const { Fetcher, FetcherInitializationError, DESCRIPTION_FIELDS } = require('../../../src/services/crawler/fetcher');
+const hotelData = require('../../utils/test-data');
 
 describe('services.crawler.fetcher', () => {
   describe('initalization', () => {
@@ -27,7 +28,7 @@ describe('services.crawler.fetcher', () => {
     });
   });
 
-  describe('fetchHotelsIds', () => {
+  describe('fetchHotelList', () => {
     const readApiUrl = 'https://read-api.wt.com',
       limit = 5;
     let fetcher;
@@ -48,7 +49,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy2' },
           ],
         });
-      const result = await fetcher.fetchHotelIds();
+      const result = await fetcher.fetchHotelList();
       assert.equal(result.ids.length, 2);
       assert.equal(result.ids[0], '0xdummy1');
       assert.equal(result.ids[1], '0xdummy2');
@@ -76,7 +77,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy7' },
           ],
         });
-      const result = await fetcher.fetchHotelIds();
+      const result = await fetcher.fetchHotelList();
       assert.equal(result.ids.length, 7);
       assert.equal(result.ids[0], '0xdummy1');
       assert.equal(result.ids[1], '0xdummy2');
@@ -101,7 +102,7 @@ describe('services.crawler.fetcher', () => {
             { data: { id: '0xerror2' } },
           ],
         });
-      const result = await fetcher.fetchHotelIds();
+      const result = await fetcher.fetchHotelList();
       assert.equal(result.ids.length, 2);
       assert.equal(result.errors.length, 2);
       assert.equal(result.errors[0], '0xerror1');
@@ -138,7 +139,7 @@ describe('services.crawler.fetcher', () => {
             { data: { id: '0xerror4' } },
           ],
         });
-      const result = await fetcher.fetchHotelIds();
+      const result = await fetcher.fetchHotelList();
       assert.equal(result.ids.length, 7);
       assert.equal(result.errors.length, 4);
       assert.equal(result.errors[0], '0xerror1');
@@ -157,7 +158,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy7' },
           ],
         });
-      const result = await fetcher.fetchHotelIds(undefined, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`);
+      const result = await fetcher.fetchHotelList(undefined, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`);
       assert.equal(result.ids.length, 2);
       assert.equal(result.ids[0], '0xdummy6');
       assert.equal(result.ids[1], '0xdummy7');
@@ -166,7 +167,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should throw if url in an argument is weird', async () => {
       try {
-        await fetcher.fetchHotelIds(undefined, 'https://google.com/look-for-travel');
+        await fetcher.fetchHotelList(undefined, 'https://google.com/look-for-travel');
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /does not look like hotels list/i);
@@ -209,7 +210,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy15' },
           ],
         });
-      const result = await fetcher.fetchHotelIds(2);
+      const result = await fetcher.fetchHotelList(2);
       assert.equal(result.ids.length, 10);
       assert.equal(result.ids[0], '0xdummy1');
       assert.equal(result.ids[1], '0xdummy2');
@@ -229,7 +230,7 @@ describe('services.crawler.fetcher', () => {
         .get(`/hotels?limit=${limit}&fields=id`)
         .reply(500);
       try {
-        await fetcher.fetchHotelIds();
+        await fetcher.fetchHotelList();
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /responded with 500/i);
@@ -243,10 +244,102 @@ describe('services.crawler.fetcher', () => {
           hotels: [],
         });
       try {
-        await fetcher.fetchHotelIds();
+        await fetcher.fetchHotelList();
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /did not respond with items list/i);
+      }
+    });
+  });
+
+  describe('fetchDataUris', () => {
+    const readApiUrl = 'https://read-api.wt.com',
+      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    let fetcher;
+
+    beforeEach(() => {
+      fetcher = new Fetcher({
+        readApiUrl,
+      });
+    });
+
+    it('should return dataUris object', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/dataUris`)
+        .reply(200, {
+          address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
+          dataUri: 'https://jirkachadima.cz/wt/http/index.json',
+          descriptionUri: 'https://jirkachadima.cz/wt/http/description.json',
+          ratePlansUri: 'https://jirkachadima.cz/wt/http/rate-plans.json',
+          availabilityUri: 'https://jirkachadima.cz/wt/http/availability.json',
+        });
+      const result = await fetcher.fetchDataUris(hotelId);
+      assert.equal(result.address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
+      assert.equal(result.dataUri, 'https://jirkachadima.cz/wt/http/index.json');
+      assert.equal(result.descriptionUri, 'https://jirkachadima.cz/wt/http/description.json');
+      assert.equal(result.ratePlansUri, 'https://jirkachadima.cz/wt/http/rate-plans.json');
+      assert.equal(result.availabilityUri, 'https://jirkachadima.cz/wt/http/availability.json');
+    });
+
+    it('should throw when hotelId is not passed', async () => {
+      try {
+        await fetcher.fetchDataUris();
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
+
+    it('should throw on non-success response', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/dataUris`)
+        .reply(502);
+      try {
+        await fetcher.fetchDataUris(hotelId);
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /responded with 502/i);
+      }
+    });
+  });
+
+  describe('fetchDesciption', () => {
+    const readApiUrl = 'https://read-api.wt.com',
+      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    let fetcher;
+
+    beforeEach(() => {
+      fetcher = new Fetcher({
+        readApiUrl,
+      });
+    });
+
+    it('should return description object', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`)
+        .reply(200, hotelData.description);
+      const result = await fetcher.fetchDescription(hotelId);
+      assert.deepEqual(result, hotelData.description);
+    });
+
+    it('should throw when hotelId is not passed', async () => {
+      try {
+        await fetcher.fetchDescription();
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
+
+    it('should throw on non-success response', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`)
+        .reply(502);
+      try {
+        await fetcher.fetchDescription(hotelId);
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /responded with 502/i);
       }
     });
   });

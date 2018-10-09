@@ -1,8 +1,8 @@
 const request = require('request-promise-native');
 
-/* const HOTEL_DESCRIPTION_FIELDS = [
+const DESCRIPTION_FIELDS = [
   'id',
-  'manager',
+  'managerAddress',
   'name',
   'description',
   'location',
@@ -16,7 +16,9 @@ const request = require('request-promise-native');
   'updatedAt',
   'defaultCancellationAmount',
   'cancellationPolicies',
-]; */
+  'notificationsUri',
+  'bookingUri',
+];
 
 class FetcherError extends Error {}
 class FetcherRemoteError extends Error {}
@@ -76,7 +78,7 @@ class Fetcher {
     });
   }
 
-  async fetchHotelIds (maxPages, url) {
+  async fetchHotelList (maxPages, url) {
     const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
     const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
     if (url && !url.match(expectedUrl)) {
@@ -84,22 +86,57 @@ class Fetcher {
     }
     return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
   };
+
+  fetchDataUris (hotelId) {
+    if (!hotelId) {
+      throw new FetcherError('hotelId is required');
+    }
+    const url = `${this.config.readApiUrl}/hotels/${hotelId}/dataUris`;
+    return request({
+      method: 'GET',
+      uri: url,
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
+      timeout: this.config.timeout,
+    }).then((response) => {
+      if (response.statusCode > 299) {
+        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
+      }
+      return response.body;
+    });
+  };
+
+  fetchDescription (hotelId) {
+    if (!hotelId) {
+      throw new FetcherError('hotelId is required');
+    }
+    const url = `${this.config.readApiUrl}/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`;
+    return request({
+      method: 'GET',
+      uri: url,
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
+      timeout: this.config.timeout,
+    }).then((response) => {
+      if (response.statusCode > 299) {
+        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
+      }
+      return response.body;
+    });
+  };
 /*
-  fetchHotelDataUris (hotelId) {
+  fetchRatePlans (hotelId) {
   };
 
-  fetchHotelDescription (hotelId) {
-  };
-
-  fetchHotelRatePlans (hotelId) {
-  };
-
-  fetchHotelAvailability (hotelId) {
+  fetchAvailability (hotelId) {
   };
 */
 }
 
 module.exports = {
+  DESCRIPTION_FIELDS,
   Fetcher,
   FetcherError,
   FetcherInitializationError,
