@@ -317,9 +317,9 @@ describe('services.crawler.fetcher', () => {
     it('should return description object', async () => {
       nock(readApiUrl)
         .get(`/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`)
-        .reply(200, hotelData.description);
+        .reply(200, hotelData.DESCRIPTION);
       const result = await fetcher.fetchDescription(hotelId);
-      assert.deepEqual(result, hotelData.description);
+      assert.deepEqual(result, hotelData.DESCRIPTION);
     });
 
     it('should throw when hotelId is not passed', async () => {
@@ -337,6 +337,88 @@ describe('services.crawler.fetcher', () => {
         .reply(502);
       try {
         await fetcher.fetchDescription(hotelId);
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /responded with 502/i);
+      }
+    });
+  });
+
+  describe('fetchRatePlans', () => {
+    const readApiUrl = 'https://read-api.wt.com',
+      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    let fetcher;
+
+    beforeEach(() => {
+      fetcher = new Fetcher({
+        readApiUrl,
+      });
+    });
+
+    it('should return description object', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/ratePlans`)
+        .reply(200, hotelData.RATE_PLANS);
+      const result = await fetcher.fetchRatePlans(hotelId);
+      assert.deepEqual(result, hotelData.RATE_PLANS);
+    });
+
+    it('should throw when hotelId is not passed', async () => {
+      try {
+        await fetcher.fetchRatePlans();
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
+
+    it('should throw on non-success response', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/ratePlans`)
+        .reply(502);
+      try {
+        await fetcher.fetchRatePlans(hotelId);
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /responded with 502/i);
+      }
+    });
+  });
+
+  describe('fetchAvailability', () => {
+    const readApiUrl = 'https://read-api.wt.com',
+      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    let fetcher;
+
+    beforeEach(() => {
+      fetcher = new Fetcher({
+        readApiUrl,
+      });
+    });
+
+    it('should return description object', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/availability`)
+        .reply(200, hotelData.AVAILABILITY);
+      const result = await fetcher.fetchAvailability(hotelId);
+      assert.deepEqual(result, hotelData.AVAILABILITY);
+    });
+
+    it('should throw when hotelId is not passed', async () => {
+      try {
+        await fetcher.fetchAvailability();
+        throw new Error('should have never been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
+
+    it('should throw on non-success response', async () => {
+      nock(readApiUrl)
+        .get(`/hotels/${hotelId}/availability`)
+        .reply(502);
+      try {
+        await fetcher.fetchAvailability(hotelId);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);

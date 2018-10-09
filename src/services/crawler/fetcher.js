@@ -126,13 +126,46 @@ class Fetcher {
       return response.body;
     });
   };
-/*
+
   fetchRatePlans (hotelId) {
+    if (!hotelId) {
+      throw new FetcherError('hotelId is required');
+    }
+    const url = `${this.config.readApiUrl}/hotels/${hotelId}/ratePlans`;
+    return request({
+      method: 'GET',
+      uri: url,
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
+      timeout: this.config.timeout,
+    }).then((response) => {
+      if (response.statusCode > 299) {
+        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
+      }
+      return response.body;
+    });
   };
 
   fetchAvailability (hotelId) {
+    if (!hotelId) {
+      throw new FetcherError('hotelId is required');
+    }
+    const url = `${this.config.readApiUrl}/hotels/${hotelId}/availability`;
+    return request({
+      method: 'GET',
+      uri: url,
+      json: true,
+      simple: false,
+      resolveWithFullResponse: true,
+      timeout: this.config.timeout,
+    }).then((response) => {
+      if (response.statusCode > 299) {
+        throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
+      }
+      return response.body;
+    });
   };
-*/
 }
 
 module.exports = {
