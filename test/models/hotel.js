@@ -22,7 +22,7 @@ describe('models.hotel', () => {
         rawData: hotelData.DESCRIPTION,
       });
       const result = await db.select('address', 'part_name', 'raw_data')
-        .from('hotels');
+        .from(Hotel.HOTELS_TABLE);
       assert.equal(result[0].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result[0].part_name, 'description');
       assert.deepEqual(JSON.parse(result[0].raw_data), hotelData.DESCRIPTION);
@@ -42,7 +42,7 @@ describe('models.hotel', () => {
         },
       ]);
       const result = await db.select('address', 'part_name', 'raw_data')
-        .from('hotels');
+        .from(Hotel.HOTELS_TABLE);
       assert.equal(result.length, 2);
       assert.equal(result[0].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result[0].part_name, 'description');
