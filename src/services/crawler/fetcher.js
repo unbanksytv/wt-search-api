@@ -84,15 +84,6 @@ class Fetcher {
     });
   }
 
-  fetchHotelList (maxPages, url) {
-    const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
-    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
-    if (url && !url.match(expectedUrl)) {
-      throw new FetcherError(`${url} does not look like hotels list URI`);
-    }
-    return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
-  };
-
   _fetchHotelResource (hotelId, url) {
     if (!hotelId) {
       throw new FetcherError('hotelId is required');
@@ -101,6 +92,15 @@ class Fetcher {
       return response.body;
     });
   }
+
+  fetchHotelList (maxPages, url) {
+    const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
+    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
+    if (url && !url.match(expectedUrl)) {
+      throw new FetcherError(`${url} does not look like hotels list URI`);
+    }
+    return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
+  };
 
   fetchDataUris (hotelId) {
     return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/dataUris`);

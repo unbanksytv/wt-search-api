@@ -1,10 +1,12 @@
+const Hotel = require('./models/hotel');
+
 /**
  * Create all necessary tables.
  *
  * @return {Promise<void>}
  */
 async function setupDB () {
-  // TODO create all models
+  await Hotel.createTable();
 }
 
 /**
@@ -13,7 +15,7 @@ async function setupDB () {
  * @return {Promise<void>}
  */
 async function resetDB () {
-  // TODO drop all models
+  await Hotel.dropTable();
   await setupDB();
 }
 
