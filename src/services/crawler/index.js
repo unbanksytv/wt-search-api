@@ -18,13 +18,17 @@ class Crawler {
     // TODO Experiment with parallelization level (i. e. large limit over number of parallel downloads)
     // TODO deal with errored ids
     const syncPromises = [];
-    const hotels = await this.getFetcher().fetchHotelList(maxPages);
-    for (let hotelId of hotels.ids) {
-      syncPromises.push(
-        this.syncHotel(hotelId)
-      );
+    try {
+      const hotels = await this.getFetcher().fetchHotelList(maxPages);
+      for (let hotelId of hotels.ids) {
+        syncPromises.push(
+          this.syncHotel(hotelId)
+        );
+      }
+      return Promise.all(syncPromises);
+    } catch (e) {
+      return [];
     }
-    return Promise.all(syncPromises);
   }
 
   syncHotel (hotelId) {

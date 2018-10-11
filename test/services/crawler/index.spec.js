@@ -36,8 +36,34 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('syncAllHotels', () => {
-    it('should initiate sync for all hotels', async () => {
+    let crawler,
+      syncHotelStub, fetchHotelListStub;
 
+    beforeEach(async () => {
+      await resetDB();
+      crawler = new Crawler({
+        readApiUrl: 'https://read-api.wt.com',
+      });
+      syncHotelStub = sinon.stub().resolves([0]);
+      fetchHotelListStub = sinon.stub().resolves({ ids: [1, 2, 3] });
+      crawler.getFetcher = sinon.stub().returns({
+        fetchHotelList: fetchHotelListStub,
+      });
+      crawler.syncHotel = syncHotelStub;
+    });
+
+    it('should initiate sync for all hotels', async () => {
+      const result = await crawler.syncAllHotels();
+      assert.equal(fetchHotelListStub.callCount, 1);
+      assert.equal(syncHotelStub.callCount, 3);
+      assert.equal(result.length, 3);
+    });
+
+    it('should end gracefully when hotel list cannot be retrieved', async () => {
+      crawler.getFetcher().fetchHotelList = sinon.stub().rejects(new Error('fetcher error'));
+      const result = await crawler.syncAllHotels();
+      assert.equal(result.length, 0);
+      assert.equal(crawler.getFetcher().fetchHotelList.callCount, 1);
     });
   });
 
