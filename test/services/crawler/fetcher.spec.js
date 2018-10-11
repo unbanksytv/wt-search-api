@@ -109,7 +109,7 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.next, undefined);
     });
 
-    it('should pass on lists if next is present', async () => {
+    it('should pass on next list if next is present', async () => {
       nock(readApiUrl)
         .get(`/hotels?limit=${limit}&fields=id`)
         .reply(200, {
@@ -157,7 +157,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy7' },
           ],
         });
-      const result = await fetcher.fetchHotelList(undefined, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`);
+      const result = await fetcher.fetchHotelList({ url: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6` });
       assert.equal(result.ids.length, 2);
       assert.equal(result.ids[0], '0xdummy6');
       assert.equal(result.ids[1], '0xdummy7');
@@ -166,7 +166,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should throw if url in an argument is weird', async () => {
       try {
-        await fetcher.fetchHotelList(undefined, 'https://google.com/look-for-travel');
+        await fetcher.fetchHotelList({ url: 'https://google.com/look-for-travel' });
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /does not look like hotels list/i);
@@ -209,7 +209,7 @@ describe('services.crawler.fetcher', () => {
             { id: '0xdummy15' },
           ],
         });
-      const result = await fetcher.fetchHotelList(2);
+      const result = await fetcher.fetchHotelList({ maxPages: 2 });
       assert.equal(result.ids.length, 10);
       assert.equal(result.ids[0], '0xdummy1');
       assert.equal(result.ids[1], '0xdummy2');

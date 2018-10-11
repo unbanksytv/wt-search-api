@@ -25,7 +25,9 @@ class Crawler {
     const syncPromises = [];
     try {
       this.config.logger.debug('Fetching hotel list');
+
       const hotels = await this.getFetcher().fetchHotelList();
+      
       for (let hotelId of hotels.ids) {
         syncPromises.push(
           this.syncHotel(hotelId)

@@ -53,21 +53,29 @@ class Fetcher {
     });
   }
 
-  _appendNextPage (maxPages, counter, previousResult) {
-    return this._fetchHotelIds(maxPages, counter, previousResult.next)
+  _appendNextPage (options) {
+    return this._fetchHotelIds({
+      maxPages: options.maxPages,
+      counter: options.counter,
+      url: options.previousResult.next,
+    })
       .then((nextItems) => {
         return {
-          ids: previousResult.ids.concat(nextItems.ids),
-          errors: previousResult.errors ? previousResult.errors.concat(nextItems.errors) : nextItems.errors,
+          ids: options.previousResult.ids.concat(nextItems.ids),
+          errors: options.previousResult.errors ? options.previousResult.errors.concat(nextItems.errors) : nextItems.errors,
           next: nextItems.next,
         };
       });
   }
 
-  _fetchHotelIds (maxPages, counter, url) {
-    return this._getSingleUrl(url, (response) => {
+  _fetchHotelIds (options) {
+    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
+    if (options.url && !options.url.match(expectedUrl)) {
+      throw new FetcherError(`${options.url} does not look like hotels list URI`);
+    }
+    return this._getSingleUrl(options.url, (response) => {
       if (!response.body || !response.body.items) {
-        throw new FetcherRemoteError(`${url} did not respond with items list as expected.`);
+        throw new FetcherRemoteError(`${options.url} did not respond with items list as expected.`);
       }
       const items = response.body.items,
         mappedItems = items.map((a) => a.id),
@@ -77,8 +85,12 @@ class Fetcher {
           errors: mappedErrors,
           next: response.body.next,
         };
-      if (response.body.next && (!maxPages || (maxPages && counter < maxPages))) {
-        return this._appendNextPage(maxPages, ++counter, result);
+      if (response.body.next && (!options.maxPages || (options.maxPages && options.counter < options.maxPages))) {
+        return this._appendNextPage({
+          maxPages: options.maxPages,
+          counter: ++options.counter,
+          previousResult: result,
+        });
       }
       return result;
     });
@@ -93,13 +105,12 @@ class Fetcher {
     });
   }
 
-  fetchHotelList (maxPages, url) {
-    const defaultUrl = `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`;
-    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
-    if (url && !url.match(expectedUrl)) {
-      throw new FetcherError(`${url} does not look like hotels list URI`);
-    }
-    return this._fetchHotelIds(maxPages, 1, url || defaultUrl);
+  fetchHotelList (options = {}) {
+    return this._fetchHotelIds({
+      maxPages: options.maxPages,
+      counter: 1,
+      url: options.url || `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
+    });
   };
 
   fetchDataUris (hotelId) {
