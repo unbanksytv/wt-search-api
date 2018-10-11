@@ -54,11 +54,9 @@ class Fetcher {
   }
 
   _appendNextPage (options) {
-    return this._fetchHotelIds({
-      maxPages: options.maxPages,
-      counter: options.counter,
+    return this._fetchHotelIds(Object.assign({
       url: options.previousResult.next,
-    })
+    }, options))
       .then((nextItems) => {
         return {
           ids: options.previousResult.ids.concat(nextItems.ids),
@@ -85,11 +83,15 @@ class Fetcher {
           errors: mappedErrors,
           next: response.body.next,
         };
+      if (options.onEveryPage) {
+        options.onEveryPage(result);
+      }
       if (response.body.next && (!options.maxPages || (options.maxPages && options.counter < options.maxPages))) {
         return this._appendNextPage({
           maxPages: options.maxPages,
           counter: ++options.counter,
           previousResult: result,
+          onEveryPage: options.onEveryPage,
         });
       }
       return result;
@@ -106,11 +108,10 @@ class Fetcher {
   }
 
   fetchHotelList (options = {}) {
-    return this._fetchHotelIds({
-      maxPages: options.maxPages,
+    return this._fetchHotelIds(Object.assign({}, {
       counter: 1,
-      url: options.url || `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
-    });
+      url: `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
+    }, options));
   };
 
   fetchDataUris (hotelId) {

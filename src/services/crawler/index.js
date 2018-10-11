@@ -25,14 +25,15 @@ class Crawler {
     const syncPromises = [];
     try {
       this.config.logger.debug('Fetching hotel list');
-
-      const hotels = await this.getFetcher().fetchHotelList();
-      
-      for (let hotelId of hotels.ids) {
-        syncPromises.push(
-          this.syncHotel(hotelId)
-        );
-      }
+      await this.getFetcher().fetchHotelList({
+        onEveryPage: (hotels) => {
+          for (let hotelId of hotels.ids) {
+            syncPromises.push(
+              this.syncHotel(hotelId)
+            );
+          }
+        },
+      });
       return Promise.all(syncPromises);
     } catch (e) {
       this.config.logger.error(`Fetching hotel list error: ${e.message}`);

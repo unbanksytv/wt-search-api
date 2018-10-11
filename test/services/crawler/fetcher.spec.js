@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const sinon = require('sinon');
 const nock = require('nock');
 const { Fetcher, FetcherInitializationError, DESCRIPTION_FIELDS } = require('../../../src/services/crawler/fetcher');
 const hotelData = require('../../utils/test-data');
@@ -109,7 +110,7 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.next, undefined);
     });
 
-    it('should pass on next list if next is present', async () => {
+    it('should pass on to the next list if next is present', async () => {
       nock(readApiUrl)
         .get(`/hotels?limit=${limit}&fields=id`)
         .reply(200, {
@@ -146,6 +147,51 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.errors[2], '0xerror3');
       assert.equal(result.errors[3], '0xerror4');
       assert.equal(result.next, undefined);
+    });
+
+    it('should use onEveryPage callback', async () => {
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy1' },
+            { id: '0xdummy2' },
+            { id: '0xdummy3' },
+            { id: '0xdummy4' },
+            { id: '0xdummy5' },
+          ],
+          errors: [
+            { data: { id: '0xerror1' } },
+            { data: { id: '0xerror2' } },
+          ],
+          next: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6`,
+        });
+      nock(readApiUrl)
+        .get(`/hotels?limit=${limit}&fields=id&startWith=0xdummy6`)
+        .reply(200, {
+          items: [
+            { id: '0xdummy6' },
+            { id: '0xdummy7' },
+          ],
+          errors: [
+            { data: { id: '0xerror3' } },
+            { data: { id: '0xerror4' } },
+          ],
+        });
+      const onEveryPageStub = sinon.stub().returns({});
+      const result = await fetcher.fetchHotelList({ onEveryPage: onEveryPageStub });
+      assert.equal(result.ids.length, 7);
+      assert.equal(result.errors.length, 4);
+      assert.equal(result.errors[0], '0xerror1');
+      assert.equal(result.errors[1], '0xerror2');
+      assert.equal(result.errors[2], '0xerror3');
+      assert.equal(result.errors[3], '0xerror4');
+      assert.equal(result.next, undefined);
+      assert.equal(onEveryPageStub.callCount, 2);
+      assert.equal(onEveryPageStub.firstCall.args[0].ids.length, 5);
+      assert.equal(onEveryPageStub.firstCall.args[0].errors.length, 2);
+      assert.equal(onEveryPageStub.secondCall.args[0].ids.length, 2);
+      assert.equal(onEveryPageStub.secondCall.args[0].errors.length, 2);
     });
 
     it('should call an url from an argument', async () => {

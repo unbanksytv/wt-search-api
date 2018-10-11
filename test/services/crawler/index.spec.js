@@ -54,7 +54,10 @@ describe('services.crawler.fetcher', () => {
         logger: logger,
       });
       syncHotelStub = sinon.stub().resolves([0]);
-      fetchHotelListStub = sinon.stub().resolves({ ids: [1, 2, 3] });
+      fetchHotelListStub = sinon.stub().callsFake((opts) => {
+        opts.onEveryPage && opts.onEveryPage({ ids: [1, 2, 3] });
+        return Promise.resolve({ ids: [1, 2, 3] });
+      });
       crawler.getFetcher = sinon.stub().returns({
         fetchHotelList: fetchHotelListStub,
       });
