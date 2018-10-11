@@ -49,7 +49,7 @@ class Fetcher {
       }
       return success(response);
     }).catch((e) => {
-      throw new FetcherRemoteError(e);
+      throw new FetcherRemoteError(e.message);
     });
   }
 

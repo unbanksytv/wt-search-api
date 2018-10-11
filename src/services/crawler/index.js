@@ -1,8 +1,14 @@
 const { Fetcher } = require('./fetcher');
 const HotelModel = require('../../models/hotel');
 
+class CrawlerError extends Error {}
+class CrawlerInitializationError extends CrawlerError {}
+
 class Crawler {
   constructor (options) {
+    if (!options.logger || !options.logger.log) {
+      throw new CrawlerInitializationError('logger is required in options!');
+    }
     this.config = options;
   }
 
@@ -13,13 +19,13 @@ class Crawler {
     return this._fetcher;
   }
 
-  // TODO change maxPages
-  async syncAllHotels (maxPages) {
-    // TODO Experiment with parallelization level (i. e. large limit over number of parallel downloads)
-    // TODO deal with errored ids
+  async syncAllHotels () {
+    // TODO deal with errored ids - although they shouldn't
+    // occur here, because it's contacting only on-chain data
     const syncPromises = [];
     try {
-      const hotels = await this.getFetcher().fetchHotelList(maxPages);
+      this.config.logger.debug('Fetching hotel list');
+      const hotels = await this.getFetcher().fetchHotelList();
       for (let hotelId of hotels.ids) {
         syncPromises.push(
           this.syncHotel(hotelId)
@@ -27,6 +33,7 @@ class Crawler {
       }
       return Promise.all(syncPromises);
     } catch (e) {
+      this.config.logger.error(`Fetching hotel list error: ${e.message}`);
       return [];
     }
   }
@@ -41,8 +48,7 @@ class Crawler {
             partName: hotelPartName,
           };
         }).catch((e) => {
-          // Silently pass
-          // TODO at least log the error, introduce injected logger
+          this.config.logger.error(`Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
         })
       );
     }
@@ -57,6 +63,7 @@ class Crawler {
           });
         }
       }
+      this.config.logger.debug(`Saving ${hotelId} into database`);
       return HotelModel.create(hotelData);
     });
   }
@@ -64,6 +71,7 @@ class Crawler {
   _fetchHotelPart (hotelId, partName) {
     const fetcher = this.getFetcher(),
       methodName = `fetch${partName.charAt(0).toUpperCase() + partName.slice(1)}`;
+    this.config.logger.debug(`Fetching ${partName} for ${hotelId}`);
     return fetcher[methodName](hotelId);
   }
 

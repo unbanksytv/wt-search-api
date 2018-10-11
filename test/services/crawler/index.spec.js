@@ -3,7 +3,7 @@ const sinon = require('sinon');
 
 const hotelData = require('../../utils/test-data');
 const { resetDB } = require('../../../src/db');
-const { db } = require('../../../src/config');
+const { db, logger } = require('../../../src/config');
 const { Crawler } = require('../../../src/services/crawler');
 const HotelModel = require('../../../src/models/hotel');
 
@@ -13,19 +13,27 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('initalization', () => {
+    it('should throw when logger is not passed in options', () => {
+      assert.throws(() => {
+        /* eslint-disable-next-line */
+        const crawler = new Crawler({});
+      }, /logger is required/i);
+    });
+
     it('should not initalize fetcher right away', () => {
-      let crawler = new Crawler({});
+      let crawler = new Crawler({ logger: logger });
       assert.isUndefined(crawler._fetcher);
     });
 
     it('should store passed config', () => {
-      let crawler = new Crawler({ op: 'tions' });
+      let crawler = new Crawler({ op: 'tions', logger: logger });
       assert.equal(crawler.config.op, 'tions');
     });
 
     it('should reuse fetcher instance', () => {
       let crawler = new Crawler({
         readApiUrl: 'https://read-api.wt.com',
+        logger: logger,
       });
       assert.isUndefined(crawler._fetcher);
       const fetcher1 = crawler.getFetcher();
@@ -43,6 +51,7 @@ describe('services.crawler.fetcher', () => {
       await resetDB();
       crawler = new Crawler({
         readApiUrl: 'https://read-api.wt.com',
+        logger: logger,
       });
       syncHotelStub = sinon.stub().resolves([0]);
       fetchHotelListStub = sinon.stub().resolves({ ids: [1, 2, 3] });
@@ -76,6 +85,7 @@ describe('services.crawler.fetcher', () => {
       await resetDB();
       crawler = new Crawler({
         readApiUrl: 'https://read-api.wt.com',
+        logger: logger,
       });
       fetchDescriptionStub = sinon.stub().resolves(hotelData.DESCRIPTION);
       fetchRatePlansStub = sinon.stub().resolves(hotelData.RATE_PLANS);
@@ -147,6 +157,7 @@ describe('services.crawler.fetcher', () => {
       await resetDB();
       crawler = new Crawler({
         readApiUrl: 'https://read-api.wt.com',
+        logger: logger,
       });
       fetchDescriptionStub = sinon.stub().resolves(hotelData.DESCRIPTION);
       fetchRatePlansStub = sinon.stub().resolves(hotelData.RATE_PLANS);
