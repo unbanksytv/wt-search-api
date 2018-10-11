@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 const { assert } = require('chai');
 const nock = require('nock');
 const { Fetcher, FetcherInitializationError, DESCRIPTION_FIELDS } = require('../../../src/services/crawler/fetcher');

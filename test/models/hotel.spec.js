@@ -10,10 +10,6 @@ describe('models.hotel', () => {
     await resetDB();
   });
 
-  after(async () => {
-    await db.destroy();
-  });
-
   describe('create', () => {
     it('should insert data', async () => {
       await Hotel.create({
