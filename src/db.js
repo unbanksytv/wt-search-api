@@ -5,19 +5,19 @@ const Hotel = require('./models/hotel');
  *
  * @return {Promise<void>}
  */
-async function setupDB () {
+const setupDB = async () => {
   await Hotel.createTable();
-}
+};
 
 /**
  * Bring the database to the initial empty state.
  *
  * @return {Promise<void>}
  */
-async function resetDB () {
+const resetDB = async () => {
   await Hotel.dropTable();
   await setupDB();
-}
+};
 
 module.exports = {
   setupDB,

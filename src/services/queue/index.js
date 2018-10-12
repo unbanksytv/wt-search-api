@@ -20,12 +20,12 @@ class Queue {
 
 let _Q;
 
-function get () {
+const get = () => {
   if (!_Q) {
     _Q = new Queue();
   }
   return _Q;
-}
+};
 
 module.exports = {
   get: get,

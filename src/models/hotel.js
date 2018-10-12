@@ -3,7 +3,7 @@ const { db } = require('../config');
 const HOTELS_TABLE = 'hotels',
   HOTEL_PART_NAMES = ['description', 'ratePlans', 'availability', 'dataUris'];
 
-const createTable = async function () {
+const createTable = async () => {
   await db.schema.createTable(HOTELS_TABLE, (table) => {
     table.increments('id');
     table.string('address', 63).notNullable();
@@ -15,11 +15,11 @@ const createTable = async function () {
   });
 };
 
-const dropTable = async function () {
+const dropTable = async () => {
   await db.schema.dropTableIfExists(HOTELS_TABLE);
 };
 
-const create = function (hotelData) {
+const create = (hotelData) => {
   if (!Array.isArray(hotelData)) {
     hotelData = [hotelData];
   }
