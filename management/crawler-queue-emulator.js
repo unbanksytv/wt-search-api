@@ -5,23 +5,28 @@ const { db, logger, crawlerOpts } = require('../src/config');
 const Queue = require('../src/services/queue');
 const { Fetcher } = require('../src/services/crawler/fetcher');
 
-const doStuff = async () => {
-  Queue.get().enqueue({
-    type: 'initialSync',
-  });
-  
-  /*
-  const fetcher = new Fetcher(crawlerOpts);
-  const list = await fetcher.fetchHotelList();
-  for (let address of list.ids) {
+const eventuallyEnqueueHotelResync = (address) => {
+  setTimeout(() => {
     Queue.get().enqueue({
       type: 'syncHotel',
       payload: {
         hotelId: address
       }
     });
+    eventuallyEnqueueHotelResync(address);
+  }, Math.floor(Math.random() * 1000 * 60 * 5) + 1000 * 60);
+}
+
+const doStuff = async () => {
+  /*Queue.get().enqueue({
+    type: 'initialSync',
+  });*/
+  
+  const fetcher = new Fetcher(crawlerOpts);
+  const list = await fetcher.fetchHotelList();
+  for (let address of list.ids) {
+    eventuallyEnqueueHotelResync(address);
   }
-  */
   /*
   Queue.get().enqueue({
       type: 'syncHotelPart',
