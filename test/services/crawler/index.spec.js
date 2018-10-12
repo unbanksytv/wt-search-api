@@ -5,7 +5,7 @@ const hotelData = require('../../utils/test-data');
 const { resetDB } = require('../../../src/db');
 const { db, logger } = require('../../../src/config');
 const { Crawler } = require('../../../src/services/crawler');
-const HotelModel = require('../../../src/models/hotel');
+const HotelModel = require('../../../src/db/permanent/models/hotel');
 
 describe('services.crawler.fetcher', () => {
   beforeEach(async () => {

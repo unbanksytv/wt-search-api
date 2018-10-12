@@ -1,5 +1,5 @@
 const { Fetcher } = require('./fetcher');
-const HotelModel = require('../../models/hotel');
+const HotelModel = require('../../db/permanent/models/hotel');
 
 class CrawlerError extends Error {}
 class CrawlerInitializationError extends CrawlerError {}

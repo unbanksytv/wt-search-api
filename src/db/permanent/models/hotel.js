@@ -1,4 +1,4 @@
-const { db } = require('../config');
+const { db } = require('../../../config');
 
 const HOTELS_TABLE = 'hotels',
   HOTEL_PART_NAMES = ['description', 'ratePlans', 'availability', 'dataUris'];

@@ -1,9 +1,9 @@
 const { assert } = require('chai');
 
-const { resetDB } = require('../../src/db');
-const { db } = require('../../src/config');
-const Hotel = require('../../src/models/hotel');
-const hotelData = require('../utils/test-data');
+const { resetDB } = require('../../../../src/db');
+const { db } = require('../../../../src/config');
+const Hotel = require('../../../../src/db/permanent/models/hotel');
+const hotelData = require('../../../utils/test-data');
 
 describe('models.hotel', () => {
   beforeEach(async () => {
