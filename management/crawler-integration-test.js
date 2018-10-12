@@ -9,7 +9,7 @@ const doStuff = async () => {
       hotelId: '0xc2954b66EB27A20c936A3D8F2365FE9349472663'
     }
   });
-    Queue.get().enqueue({
+  Queue.get().enqueue({
     type: 'syncHotel',
     payload: {
       hotelId: '0x037Ee5a21F662720bDD535620442C0A8B3E21FF7'

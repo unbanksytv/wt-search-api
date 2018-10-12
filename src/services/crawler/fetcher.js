@@ -35,35 +35,34 @@ class Fetcher {
     }, options);
   }
 
-  _getSingleUrl (url, success) {
-    return request({
-      method: 'GET',
-      uri: url,
-      json: true,
-      simple: false,
-      resolveWithFullResponse: true,
-      timeout: this.config.timeout,
-    }).then((response) => {
+  async _getSingleUrl (url, success) {
+    try {
+      const response = await request({
+        method: 'GET',
+        uri: url,
+        json: true,
+        simple: false,
+        resolveWithFullResponse: true,
+        timeout: this.config.timeout,
+      });
       if (response.statusCode > 299) {
         throw new FetcherRemoteError(`${url} responded with ${response.statusCode}.`);
       }
       return success(response);
-    }).catch((e) => {
+    } catch (e) {
       throw new FetcherRemoteError(e.message);
-    });
+    }
   }
 
-  _appendNextPage (options) {
-    return this._fetchHotelIds(Object.assign({
+  async _appendNextPage (options) {
+    const nextItems = await this._fetchHotelIds(Object.assign({
       url: options.previousResult.next,
-    }, options))
-      .then((nextItems) => {
-        return {
-          ids: options.previousResult.ids.concat(nextItems.ids),
-          errors: options.previousResult.errors ? options.previousResult.errors.concat(nextItems.errors) : nextItems.errors,
-          next: nextItems.next,
-        };
-      });
+    }, options));
+    return {
+      ids: options.previousResult.ids.concat(nextItems.ids),
+      errors: options.previousResult.errors ? options.previousResult.errors.concat(nextItems.errors) : nextItems.errors,
+      next: nextItems.next,
+    };
   }
 
   _fetchHotelIds (options) {
