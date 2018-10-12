@@ -1,15 +1,15 @@
-const { Crawler } = require('../crawler');
-const { logger, crawlerOpts } = require('../../config');
-
-const crawler = new Crawler(Object.assign({}, crawlerOpts, {
-  logger: logger,
-}));
+const crawlerAdapter = require('../crawler/queue-adapter');
 
 module.exports.process = async function (message) {
   switch (message.type) {
   case 'syncHotel':
-    // TODO change this into a crawlerQueue adapter
-    crawler.syncHotel(message.payload.hotelId);
+    crawlerAdapter.syncHotel(message.payload);
+    break;
+  case 'syncHotelPart':
+    crawlerAdapter.syncHotelPart(message.payload);
+    break;
+  case 'initialSync':
+    crawlerAdapter.initialSync();
     break;
   default:
         // do nothing

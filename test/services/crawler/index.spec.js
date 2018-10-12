@@ -179,6 +179,15 @@ describe('services.crawler.fetcher', () => {
       assert.equal(createSpy.callCount, 0);
       createSpy.restore();
     });
+
+    it('should throw when hotelId is missing', async () => {
+      try {
+        await crawler.syncHotel();
+        throw new Error('should have not been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
   });
 
   describe('syncHotelPart', () => {
@@ -235,6 +244,24 @@ describe('services.crawler.fetcher', () => {
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /fetcher error/i);
+      }
+    });
+
+    it('should throw when hotelId is missing', async () => {
+      try {
+        await crawler.syncHotelPart();
+        throw new Error('should have not been called');
+      } catch (e) {
+        assert.match(e.message, /hotelId is required/i);
+      }
+    });
+
+    it('should throw when partName is missing', async () => {
+      try {
+        await crawler.syncHotelPart('0xdummy');
+        throw new Error('should have not been called');
+      } catch (e) {
+        assert.match(e.message, /partName is required/i);
       }
     });
   });

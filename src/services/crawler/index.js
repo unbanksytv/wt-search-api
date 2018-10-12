@@ -42,6 +42,9 @@ class Crawler {
   }
 
   async syncHotel (hotelId) {
+    if (!hotelId) {
+      throw new CrawlerError('hotelId is required to syncHotel.');
+    }
     this.config.logger.debug(`Fetching ${hotelId} /dataUris`);
     try {
       const indexData = await this.syncHotelPart(hotelId, 'dataUris');
@@ -87,6 +90,12 @@ class Crawler {
   }
 
   async syncHotelPart (hotelId, partName) {
+    if (!hotelId) {
+      throw new CrawlerError('hotelId is required to syncHotelPart.');
+    }
+    if (!partName) {
+      throw new CrawlerError('partName is required to syncHotelPart.');
+    }
     const rawData = await this._fetchHotelPart(hotelId, partName);
     return {
       rawData: rawData,

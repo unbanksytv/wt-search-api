@@ -4,16 +4,7 @@ const Queue = require('../src/services/queue');
 
 const doStuff = async () => {
   Queue.get().enqueue({
-    type: 'syncHotel',
-    payload: {
-      hotelId: '0xc2954b66EB27A20c936A3D8F2365FE9349472663'
-    }
-  });
-  Queue.get().enqueue({
-    type: 'syncHotel',
-    payload: {
-      hotelId: '0x037Ee5a21F662720bDD535620442C0A8B3E21FF7'
-    }
+    type: 'initialSync',
   });
   // Can't call destroy, because queue does not wait
   //await db.destroy();
