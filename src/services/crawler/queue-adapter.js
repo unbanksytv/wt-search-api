@@ -14,7 +14,7 @@ const initialSync = () => {
 };
 
 const syncHotelPart = (payload) => {
-  crawler.syncHotel(payload.hotelId, payload.partName);
+  crawler.syncHotelPart(payload.hotelId, payload.partName);
 };
 
 module.exports = {

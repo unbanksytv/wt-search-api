@@ -97,6 +97,7 @@ class Crawler {
       throw new CrawlerError('partName is required to syncHotelPart.');
     }
     const rawData = await this._fetchHotelPart(hotelId, partName);
+    this.config.logger.debug(`Saving ${hotelId} into database`);
     return {
       rawData: rawData,
       db: await HotelModel.create({
