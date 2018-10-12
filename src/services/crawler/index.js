@@ -51,7 +51,6 @@ class Crawler {
           return typeof dataUris[`${p}Uri`] === 'string';
         });
         for (let hotelPartName of parts) {
-          this.config.logger.debug(`Fetching ${hotelId} /${hotelPartName}`);
           hotelPartPromises.push(
             /* eslint-disable-next-line promise/no-nesting */
             this._fetchHotelPart(hotelId, hotelPartName).then((rawData) => {
