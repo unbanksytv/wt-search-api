@@ -95,6 +95,10 @@ describe('services.crawler.fetcher', () => {
       fetchAvailabilityStub = sinon.stub().resolves(hotelData.AVAILABILITY);
       fetchDataUrisStub = sinon.stub().resolves({
         address: '0xdummy',
+        dataUri: 'https://example.com/data',
+        descriptionUri: 'https://example.com/description',
+        ratePlansUri: 'https://example.com/rate-plans',
+        availabilityUri: 'https://example.com/availability',
       });
       crawler.getFetcher = sinon.stub().returns({
         fetchDescription: fetchDescriptionStub,
@@ -112,25 +116,38 @@ describe('services.crawler.fetcher', () => {
       assert.equal(fetchDataUrisStub.callCount, 1);
     });
 
-    it('should do only one db insert', async () => {
+    it('should not fetch parts that do not have data uri', async () => {
+      crawler.getFetcher().fetchDataUris = sinon.stub().resolves({
+        address: '0xdummy',
+        dataUri: 'https://example.com/data',
+        descriptionUri: 'https://example.com/description',
+      });
+      await crawler.syncHotel('0xdummy');
+      assert.equal(fetchDescriptionStub.callCount, 1);
+      assert.equal(fetchRatePlansStub.callCount, 0);
+      assert.equal(fetchAvailabilityStub.callCount, 0);
+      assert.equal(crawler.getFetcher().fetchDataUris.callCount, 1);
+    });
+
+    it('should do only one db insert for non dataUris', async () => {
       const createSpy = sinon.spy(HotelModel, 'create');
       await crawler.syncHotel('0xdummy');
-      assert.equal(createSpy.callCount, 1);
+      assert.equal(createSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
         .from(HotelModel.HOTELS_TABLE);
       assert.equal(result.length, 4);
       assert.equal(result[0].address, '0xdummy');
-      assert.equal(result[0].part_name, 'description');
+      assert.equal(result[0].part_name, 'dataUris');
       assert.equal(result[1].address, '0xdummy');
-      assert.equal(result[1].part_name, 'ratePlans');
+      assert.equal(result[1].part_name, 'description');
       assert.equal(result[2].address, '0xdummy');
-      assert.equal(result[2].part_name, 'availability');
+      assert.equal(result[2].part_name, 'ratePlans');
       assert.equal(result[3].address, '0xdummy');
-      assert.equal(result[3].part_name, 'dataUris');
+      assert.equal(result[3].part_name, 'availability');
       createSpy.restore();
     });
 
-    it('should not panic on fetch error', async () => {
+    it('should not panic on fetch error of data document', async () => {
       const createSpy = sinon.spy(HotelModel, 'create');
       crawler.getFetcher().fetchDescription = sinon.stub().rejects(new Error('fetcher error'));
       await crawler.syncHotel('0xdummy');
@@ -138,16 +155,28 @@ describe('services.crawler.fetcher', () => {
       assert.equal(fetchRatePlansStub.callCount, 1);
       assert.equal(fetchAvailabilityStub.callCount, 1);
       assert.equal(fetchDataUrisStub.callCount, 1);
-      assert.equal(createSpy.callCount, 1);
+      assert.equal(createSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
         .from(HotelModel.HOTELS_TABLE);
       assert.equal(result.length, 3);
       assert.equal(result[0].address, '0xdummy');
-      assert.equal(result[0].part_name, 'ratePlans');
+      assert.equal(result[0].part_name, 'dataUris');
       assert.equal(result[1].address, '0xdummy');
-      assert.equal(result[1].part_name, 'availability');
+      assert.equal(result[1].part_name, 'ratePlans');
       assert.equal(result[2].address, '0xdummy');
-      assert.equal(result[2].part_name, 'dataUris');
+      assert.equal(result[2].part_name, 'availability');
+      createSpy.restore();
+    });
+
+    it('should not panic on fetch error of dataUris', async () => {
+      const createSpy = sinon.spy(HotelModel, 'create');
+      crawler.getFetcher().fetchDataUris = sinon.stub().rejects(new Error('fetcher error'));
+      await crawler.syncHotel('0xdummy');
+      assert.equal(crawler.getFetcher().fetchDataUris.callCount, 1);
+      assert.equal(fetchRatePlansStub.callCount, 0);
+      assert.equal(fetchAvailabilityStub.callCount, 0);
+      assert.equal(fetchDataUrisStub.callCount, 0);
+      assert.equal(createSpy.callCount, 0);
       createSpy.restore();
     });
   });
@@ -177,6 +206,12 @@ describe('services.crawler.fetcher', () => {
       await crawler.syncHotelPart('0xdummy', 'ratePlans');
       assert.equal(fetchDescriptionStub.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 1);
+    });
+
+    it('should return downloaded data', async () => {
+      const result = await crawler.syncHotelPart('0xdummy', 'description');
+      assert.equal(result.db.length, 1);
+      assert.deepEqual(result.rawData, hotelData.DESCRIPTION);
     });
 
     it('should store data', async () => {

@@ -42,33 +42,45 @@ class Crawler {
   }
 
   syncHotel (hotelId) {
-    const hotelPartPromises = [];
-    for (let hotelPartName of HotelModel.HOTEL_PART_NAMES) {
-      hotelPartPromises.push(
-        this._fetchHotelPart(hotelId, hotelPartName).then((rawData) => {
-          return {
-            rawData: rawData,
-            partName: hotelPartName,
-          };
-        }).catch((e) => {
-          this.config.logger.error(`Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
-        })
-      );
-    }
-    return Promise.all(hotelPartPromises).then((data) => {
-      const hotelData = [];
-      for (let i = 0; i < data.length; i++) {
-        if (data[i]) {
-          hotelData.push({
-            address: hotelId,
-            partName: data[i].partName,
-            rawData: data[i].rawData,
-          });
+    this.config.logger.debug(`Fetching ${hotelId} /dataUris`);
+    return this.syncHotelPart(hotelId, 'dataUris')
+      .then((data) => {
+        const dataUris = data.rawData;
+        const hotelPartPromises = [];
+        const parts = HotelModel.HOTEL_PART_NAMES.filter((p) => {
+          return typeof dataUris[`${p}Uri`] === 'string';
+        });
+        for (let hotelPartName of parts) {
+          this.config.logger.debug(`Fetching ${hotelId} /${hotelPartName}`);
+          hotelPartPromises.push(
+            /* eslint-disable-next-line promise/no-nesting */
+            this._fetchHotelPart(hotelId, hotelPartName).then((rawData) => {
+              return {
+                rawData: rawData,
+                partName: hotelPartName,
+              };
+            }).catch((e) => {
+              this.config.logger.error(`Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
+            })
+          );
         }
-      }
-      this.config.logger.debug(`Saving ${hotelId} into database`);
-      return HotelModel.create(hotelData);
-    });
+        return Promise.all(hotelPartPromises);
+      }).then((data) => {
+        const hotelData = [];
+        for (let i = 0; i < data.length; i++) {
+          if (data[i]) {
+            hotelData.push({
+              address: hotelId,
+              partName: data[i].partName,
+              rawData: data[i].rawData,
+            });
+          }
+        }
+        this.config.logger.debug(`Saving ${hotelId} into database`);
+        return HotelModel.create(hotelData);
+      }).catch((e) => {
+        this.config.logger.error(`Fetching hotel part error: ${hotelId}:dataUris - ${e.message}`);
+      });
   }
 
   _fetchHotelPart (hotelId, partName) {
@@ -79,11 +91,15 @@ class Crawler {
   }
 
   async syncHotelPart (hotelId, partName) {
-    return HotelModel.create({
-      address: hotelId,
-      partName: partName,
-      rawData: await this._fetchHotelPart(hotelId, partName),
-    });
+    const rawData = await this._fetchHotelPart(hotelId, partName);
+    return {
+      rawData: rawData,
+      db: await HotelModel.create({
+        address: hotelId,
+        partName: partName,
+        rawData: rawData,
+      }),
+    };
   }
 }
 
