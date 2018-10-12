@@ -91,4 +91,57 @@ describe('models.hotel', () => {
       }
     });
   });
+
+  describe('getLatestHotelData', () => {
+    const hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    beforeEach(async () => {
+      await Hotel.create({
+        address: hotelId,
+        partName: 'dataUris',
+        rawData: {
+          descriptionUri: 'schema://uri',
+        },
+      });
+      await Hotel.create({
+        address: hotelId,
+        partName: 'description',
+        rawData: { name: 'stale data' },
+      });
+      await Hotel.create({
+        address: hotelId,
+        partName: 'ratePlans',
+        rawData: hotelData.RATE_PLANS,
+      });
+      await Hotel.create({
+        address: hotelId,
+        partName: 'availability',
+        rawData: hotelData.AVAILABILITY,
+      });
+      await Hotel.create({
+        address: hotelId,
+        partName: 'description',
+        rawData: hotelData.DESCRIPTION,
+      });
+    });
+
+    it('should select all data parts', async () => {
+      const result = await Hotel.getLatestHotelData(hotelId);
+      assert.equal(result.address, hotelId);
+      assert.isDefined(result.data);
+      assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
+      assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
+      assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
+      assert.isUndefined(result.data.dataUris);
+    });
+
+    it('should select only the latest part of the same type', async () => {
+      const result = await Hotel.getLatestHotelData(hotelId);
+      assert.equal(result.address, hotelId);
+      assert.isDefined(result.data);
+      assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
+      assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
+      assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
+      assert.isUndefined(result.data.dataUris);
+    });
+  });
 });

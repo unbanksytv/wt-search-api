@@ -36,10 +36,42 @@ const create = (hotelData) => {
     }));
 };
 
+const getLatestHotelData = async (hotelId) => {
+  // TODO make this SQL hell more readable
+  const generateSelect = (partName) => {
+    return `select
+      \`raw_data\`, \`part_name\`, \`id\` from \`${HOTELS_TABLE}\`
+      where \`address\` = '${hotelId}' and
+      \`part_name\` = '${partName}' and
+      \`id\` = (select max(\`id\`) from \`${HOTELS_TABLE}\`
+        where \`address\` = '${hotelId}' and
+        \`part_name\` = '${partName}')`;
+  };
+
+  const result = await db.raw(`
+    ${generateSelect('description')} union
+    ${generateSelect('ratePlans')} union
+    ${generateSelect('availability')}
+  `);
+  return result.map((p) => {
+    return {
+      rawData: JSON.parse(p.raw_data),
+      partName: p.part_name,
+    };
+  }).reduce((agg, p) => {
+    agg.data[p.partName] = p.rawData;
+    return agg;
+  }, {
+    address: hotelId,
+    data: {},
+  });
+};
+
 module.exports = {
   createTable,
   dropTable,
   create,
+  getLatestHotelData,
   HOTELS_TABLE,
   HOTEL_PART_NAMES,
 };
