@@ -23,4 +23,9 @@ module.exports = {
       }),
     ],
   }),
+  crawlerOpts: {
+    readApiUrl: 'https://playground-api.windingtree.com',
+    timeout: 30000,
+    limit: 10,
+  },
 };
