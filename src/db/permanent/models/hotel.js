@@ -61,10 +61,34 @@ const getLatestHotelData = async (hotelId) => {
   });
 };
 
+/**
+ * Get a list of hotels based on the index filters.
+ *
+ * // TODO: finish & test the implementation; docs
+ */
+const getList = (fields, filters, sorting) => {
+  let query = db(HOTELS_TABLE);
+  for (let filter of filters) {
+    query = query.leftJoin(filter.table, `${HOTELS_TABLE}.id}`, '=', `${filter.table}.hotelId`);
+  }
+
+  let conditionCnt = 0;
+  for (let filter of filters) {
+    if (conditionCnt === 0) {
+      query = query.where(filter.condition);
+    } else {
+      query = query.andWhere(filter.condition);
+    }
+    conditionCnt += 1;
+  }
+  return query.select(fields.map((f) => `${HOTELS_TABLE}.f`));
+};
+
 module.exports = {
   createTable,
   dropTable,
   create,
+  getList,
   getLatestHotelData,
   HOTELS_TABLE,
   HOTEL_PART_NAMES,
