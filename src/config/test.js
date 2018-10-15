@@ -10,7 +10,7 @@ module.exports = {
     useNullAsDefault: true,
   }),
   logger: winston.createLogger({
-    level: 'warn',
+    level: 'error',
     transports: [
       new winston.transports.Console({
         format: winston.format.simple(),

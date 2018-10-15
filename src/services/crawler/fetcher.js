@@ -134,5 +134,6 @@ module.exports = {
   DESCRIPTION_FIELDS,
   Fetcher,
   FetcherError,
+  FetcherRemoteError,
   FetcherInitializationError,
 };

@@ -5,6 +5,7 @@ const hotelData = require('../../utils/test-data');
 const { resetDB } = require('../../../src/db');
 const { db, logger } = require('../../../src/config');
 const { Crawler } = require('../../../src/services/crawler');
+const { FetcherRemoteError } = require('../../../src/services/crawler/fetcher');
 const HotelModel = require('../../../src/db/permanent/models/hotel');
 
 describe('services.crawler.fetcher', () => {
@@ -72,7 +73,7 @@ describe('services.crawler.fetcher', () => {
     });
 
     it('should end gracefully when hotel list cannot be retrieved', async () => {
-      crawler.getFetcher().fetchHotelList = sinon.stub().rejects(new Error('fetcher error'));
+      crawler.getFetcher().fetchHotelList = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
       const result = await crawler.syncAllHotels();
       assert.equal(result.length, 0);
       assert.equal(crawler.getFetcher().fetchHotelList.callCount, 1);
@@ -149,7 +150,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should not panic on fetch error of data document', async () => {
       const createSpy = sinon.spy(HotelModel, 'create');
-      crawler.getFetcher().fetchDescription = sinon.stub().rejects(new Error('fetcher error'));
+      crawler.getFetcher().fetchDescription = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
       await crawler.syncHotel('0xdummy');
       assert.equal(crawler.getFetcher().fetchDescription.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 1);
@@ -170,7 +171,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should not panic on fetch error of dataUris', async () => {
       const createSpy = sinon.spy(HotelModel, 'create');
-      crawler.getFetcher().fetchDataUris = sinon.stub().rejects(new Error('fetcher error'));
+      crawler.getFetcher().fetchDataUris = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
       await crawler.syncHotel('0xdummy');
       assert.equal(crawler.getFetcher().fetchDataUris.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 0);
@@ -237,7 +238,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should throw on fetch error', async () => {
       crawler.getFetcher = sinon.stub().returns({
-        fetchRatePlans: sinon.stub().rejects(new Error('fetcher error')),
+        fetchRatePlans: sinon.stub().rejects(new FetcherRemoteError('fetcher error')),
       });
       try {
         await crawler.syncHotelPart('0xdummy', 'ratePlans');

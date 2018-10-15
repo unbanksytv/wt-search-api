@@ -1,4 +1,4 @@
-const { Fetcher } = require('./fetcher');
+const { Fetcher, FetcherRemoteError } = require('./fetcher');
 const HotelModel = require('../../db/permanent/models/hotel');
 
 class CrawlerError extends Error {}
@@ -10,6 +10,15 @@ class Crawler {
       throw new CrawlerInitializationError('logger is required in options!');
     }
     this.config = options;
+  }
+
+  logError (err, message) {
+    // Distinguish between remote errors (we expect them to
+    // happen from time to time, they're part of the business)
+    // and unexpected ones (true errors representing flaws in
+    // our logic).
+    const level = (err instanceof FetcherRemoteError) ? 'warn' : 'error';
+    this.config.logger[level](err.message);
   }
 
   getFetcher () {
@@ -36,7 +45,7 @@ class Crawler {
       });
       return Promise.all(syncPromises);
     } catch (e) {
-      this.config.logger.error(`Fetching hotel list error: ${e.message}`);
+      this.logError(e, `Fetching hotel list error: ${e.message}`);
       return [];
     }
   }
@@ -62,7 +71,7 @@ class Crawler {
               partName: hotelPartName,
             };
           } catch (e) {
-            this.config.logger.error(`Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
+            this.logError(e, `Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
           }
         })());
       }
@@ -78,7 +87,7 @@ class Crawler {
       this.config.logger.debug(`Saving ${hotelId} into database`);
       return HotelModel.create(hotelData);
     } catch (e) {
-      this.config.logger.error(`Fetching hotel part error: ${hotelId}:dataUris - ${e.message}`);
+      this.logError(e, `Fetching hotel part error: ${hotelId}:dataUris - ${e.message}`);
     };
   }
 
