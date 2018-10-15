@@ -41,9 +41,7 @@ const getLatestHotelData = async (hotelId) => {
   const generateSelect = (partName) => {
     return `select
       \`raw_data\`, \`part_name\`, \`id\` from \`${HOTELS_TABLE}\`
-      where \`address\` = '${hotelId}' and
-      \`part_name\` = '${partName}' and
-      \`id\` = (select max(\`id\`) from \`${HOTELS_TABLE}\`
+      where \`id\` = (select max(\`id\`) from \`${HOTELS_TABLE}\`
         where \`address\` = '${hotelId}' and
         \`part_name\` = '${partName}')`;
   };
