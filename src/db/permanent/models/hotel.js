@@ -37,20 +37,16 @@ const create = (hotelData) => {
 };
 
 const getLatestHotelData = async (hotelId) => {
-  // TODO make this SQL hell more readable
-  const generateSelect = (partName) => {
-    return `select
-      \`raw_data\`, \`part_name\`, \`id\` from \`${HOTELS_TABLE}\`
-      where \`id\` = (select max(\`id\`) from \`${HOTELS_TABLE}\`
-        where \`address\` = '${hotelId}' and
-        \`part_name\` = '${partName}')`;
-  };
+  const partNames = ['description', 'ratePlans', 'availability'],
+    result = await db.from(HOTELS_TABLE).whereIn('id', function () {
+      this.union(partNames.map((partName) => function () {
+        this.from(HOTELS_TABLE).max('id').where({
+          'address': hotelId,
+          'part_name': partName,
+        });
+      }));
+    }).select('raw_data', 'part_name', 'id');
 
-  const result = await db.raw(`
-    ${generateSelect('description')} union
-    ${generateSelect('ratePlans')} union
-    ${generateSelect('availability')}
-  `);
   return result.map((p) => {
     return {
       rawData: JSON.parse(p.raw_data),
