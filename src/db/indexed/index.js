@@ -1,10 +1,12 @@
+const Location = require('./models/location');
+
 /**
  * Create all necessary tables.
  *
  * @return {Promise<void>}
  */
 const setupDB = async () => {
-  // TODO
+  await Location.createTable();
 };
 
 /**
@@ -13,7 +15,7 @@ const setupDB = async () => {
  * @return {Promise<void>}
  */
 const resetDB = async () => {
-  // TODO
+  await Location.dropTable();
   await setupDB();
 };
 

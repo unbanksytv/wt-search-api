@@ -62,33 +62,43 @@ const getLatestHotelData = async (hotelAddress) => {
 };
 
 /**
- * Get a list of hotels based on the index filters.
+ * Get a list of hotel addresses based on the index filters.
  *
- * // TODO: finish & test the implementation; docs
+ * @param {Array} filters
+ * @param {Function} sorting (optional)
+ * @return {Promise<Array>}
+ *
  */
-const getList = (fields, filters, sorting) => {
-  let query = db(HOTELS_TABLE);
-  for (let filter of filters) {
-    query = query.leftJoin(filter.table, `${HOTELS_TABLE}.id}`, '=', `${filter.table}.hotelId`);
+const getAddresses = async (filters, sorting) => {
+  const head = filters[0],
+    tail = filters.slice(1),
+    table = head.table;
+  let query = db(table);
+  for (let filter of tail) {
+    query = query.innerJoin(table, `${table}.hotel_address`, '=', `${filter.table}.hotel_address`);
+  }
+  query = query.where(head.condition);
+  for (let filter of tail) {
+    query = query.andWhere(filter.condition);
   }
 
-  let conditionCnt = 0;
-  for (let filter of filters) {
-    if (conditionCnt === 0) {
-      query = query.where(filter.condition);
-    } else {
-      query = query.andWhere(filter.condition);
+  if (sorting) {
+    const filterTables = filters.map((x) => x.table);
+    if (filterTables.indexOf(sorting.table) === -1) {
+      query = query.innerJoin(sorting.table, `${table}.hotel_address`, '=', `${sorting.table}.hotel_address`);
     }
-    conditionCnt += 1;
+    query.select(sorting.select).orderBy(sorting.columnName);
   }
-  return query.select(fields.map((f) => `${HOTELS_TABLE}.f`));
+
+  const data = await query.select(`${table}.hotel_address`);
+  return data.map((item) => item.hotel_address);
 };
 
 module.exports = {
   createTable,
   dropTable,
   create,
-  getList,
+  getAddresses,
   getLatestHotelData,
   HOTELS_TABLE,
   HOTEL_PART_NAMES,
