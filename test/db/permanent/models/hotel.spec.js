@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { resetDB } = require('../../../../src/db');
+const { resetDB } = require('../../../../src/db/permanent');
 const { db } = require('../../../../src/config');
 const Hotel = require('../../../../src/db/permanent/models/hotel');
 const hotelData = require('../../../utils/test-data');
