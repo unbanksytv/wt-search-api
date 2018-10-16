@@ -49,13 +49,13 @@ describe('models.location', () => {
     it('should approximately convert kilometers to degrees for short distances', async () => {
       const distances = Location._convertKilometersToDegrees(50.386, 14.289, 2);
       let expected = 0.028;
-      assert.approximately(distances.lng, expected, expected / 10);
+      assert.approximately(distances.lng, expected, expected / 100);
     });
 
     it('should approximately convert kilometers to degrees for midsized distances', async () => {
       const distances = Location._convertKilometersToDegrees(50.386, 14.289, 20);
       let expected = 0.282;
-      assert.approximately(distances.lng, expected, expected / 10);
+      assert.approximately(distances.lng, expected, expected / 100);
     });
 
     it('should work well in the southern hemisphere', async () => {

@@ -60,7 +60,7 @@ function _convertKilometersToDegrees (lat, lng, distance) {
   lat = Math.abs(lat);
   lng = Math.abs(lng);
   // The distance between longitude degrees decreases with the distance from equator.
-  const scale = (Math.PI / 2) - _toRadians(lat),
+  const scale = Math.cos(_toRadians(lat)),
     longitudeDegreeLength = scale * LONGITUDE_DEGREE_LENGTH_EQUATOR;
 
   return {
@@ -113,7 +113,7 @@ function getFilter (lat, lng, distance) {
  *
  */
 function getSorting (lat, lng) {
-  const scale = (Math.PI / 2) - _toRadians(Math.abs(lat)),
+  const scale = Math.cos(_toRadians(Math.abs(lat))),
     scaleSquared = Math.pow(scale, 2);
   return {
     table: TABLE,
