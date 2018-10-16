@@ -40,7 +40,7 @@ describe('services.crawler.fetcher', () => {
       });
     });
 
-    it('should get a list of ids from readApiUrl', async () => {
+    it('should get a list of addresses from readApiUrl', async () => {
       nock(readApiUrl)
         .get(`/hotels?limit=${limit}&fields=id`)
         .reply(200, {
@@ -50,9 +50,9 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList();
-      assert.equal(result.ids.length, 2);
-      assert.equal(result.ids[0], '0xdummy1');
-      assert.equal(result.ids[1], '0xdummy2');
+      assert.equal(result.addresses.length, 2);
+      assert.equal(result.addresses[0], '0xdummy1');
+      assert.equal(result.addresses[1], '0xdummy2');
       assert.equal(result.next, undefined);
     });
 
@@ -78,14 +78,14 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList();
-      assert.equal(result.ids.length, 7);
-      assert.equal(result.ids[0], '0xdummy1');
-      assert.equal(result.ids[1], '0xdummy2');
-      assert.equal(result.ids[2], '0xdummy3');
-      assert.equal(result.ids[3], '0xdummy4');
-      assert.equal(result.ids[4], '0xdummy5');
-      assert.equal(result.ids[5], '0xdummy6');
-      assert.equal(result.ids[6], '0xdummy7');
+      assert.equal(result.addresses.length, 7);
+      assert.equal(result.addresses[0], '0xdummy1');
+      assert.equal(result.addresses[1], '0xdummy2');
+      assert.equal(result.addresses[2], '0xdummy3');
+      assert.equal(result.addresses[3], '0xdummy4');
+      assert.equal(result.addresses[4], '0xdummy5');
+      assert.equal(result.addresses[5], '0xdummy6');
+      assert.equal(result.addresses[6], '0xdummy7');
       assert.equal(result.next, undefined);
     });
 
@@ -103,7 +103,7 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList();
-      assert.equal(result.ids.length, 2);
+      assert.equal(result.addresses.length, 2);
       assert.equal(result.errors.length, 2);
       assert.equal(result.errors[0], '0xerror1');
       assert.equal(result.errors[1], '0xerror2');
@@ -140,7 +140,7 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList();
-      assert.equal(result.ids.length, 7);
+      assert.equal(result.addresses.length, 7);
       assert.equal(result.errors.length, 4);
       assert.equal(result.errors[0], '0xerror1');
       assert.equal(result.errors[1], '0xerror2');
@@ -180,7 +180,7 @@ describe('services.crawler.fetcher', () => {
         });
       const onEveryPageStub = sinon.stub().returns({});
       const result = await fetcher.fetchHotelList({ onEveryPage: onEveryPageStub });
-      assert.equal(result.ids.length, 7);
+      assert.equal(result.addresses.length, 7);
       assert.equal(result.errors.length, 4);
       assert.equal(result.errors[0], '0xerror1');
       assert.equal(result.errors[1], '0xerror2');
@@ -188,9 +188,9 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.errors[3], '0xerror4');
       assert.equal(result.next, undefined);
       assert.equal(onEveryPageStub.callCount, 2);
-      assert.equal(onEveryPageStub.firstCall.args[0].ids.length, 5);
+      assert.equal(onEveryPageStub.firstCall.args[0].addresses.length, 5);
       assert.equal(onEveryPageStub.firstCall.args[0].errors.length, 2);
-      assert.equal(onEveryPageStub.secondCall.args[0].ids.length, 2);
+      assert.equal(onEveryPageStub.secondCall.args[0].addresses.length, 2);
       assert.equal(onEveryPageStub.secondCall.args[0].errors.length, 2);
     });
 
@@ -204,9 +204,9 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList({ url: `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy6` });
-      assert.equal(result.ids.length, 2);
-      assert.equal(result.ids[0], '0xdummy6');
-      assert.equal(result.ids[1], '0xdummy7');
+      assert.equal(result.addresses.length, 2);
+      assert.equal(result.addresses[0], '0xdummy6');
+      assert.equal(result.addresses[1], '0xdummy7');
       assert.equal(result.next, undefined);
     });
 
@@ -256,17 +256,17 @@ describe('services.crawler.fetcher', () => {
           ],
         });
       const result = await fetcher.fetchHotelList({ maxPages: 2 });
-      assert.equal(result.ids.length, 10);
-      assert.equal(result.ids[0], '0xdummy1');
-      assert.equal(result.ids[1], '0xdummy2');
-      assert.equal(result.ids[2], '0xdummy3');
-      assert.equal(result.ids[3], '0xdummy4');
-      assert.equal(result.ids[4], '0xdummy5');
-      assert.equal(result.ids[5], '0xdummy6');
-      assert.equal(result.ids[6], '0xdummy7');
-      assert.equal(result.ids[7], '0xdummy8');
-      assert.equal(result.ids[8], '0xdummy9');
-      assert.equal(result.ids[9], '0xdummy10');
+      assert.equal(result.addresses.length, 10);
+      assert.equal(result.addresses[0], '0xdummy1');
+      assert.equal(result.addresses[1], '0xdummy2');
+      assert.equal(result.addresses[2], '0xdummy3');
+      assert.equal(result.addresses[3], '0xdummy4');
+      assert.equal(result.addresses[4], '0xdummy5');
+      assert.equal(result.addresses[5], '0xdummy6');
+      assert.equal(result.addresses[6], '0xdummy7');
+      assert.equal(result.addresses[7], '0xdummy8');
+      assert.equal(result.addresses[8], '0xdummy9');
+      assert.equal(result.addresses[9], '0xdummy10');
       assert.equal(result.next, `${readApiUrl}/hotels?limit=${limit}&fields=id&startWith=0xdummy11`);
     });
 
@@ -299,7 +299,7 @@ describe('services.crawler.fetcher', () => {
 
   describe('fetchDataUris', () => {
     const readApiUrl = 'https://read-api.wt.com',
-      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
@@ -310,7 +310,7 @@ describe('services.crawler.fetcher', () => {
 
     it('should return dataUris object', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/dataUris`)
+        .get(`/hotels/${hotelAddress}/dataUris`)
         .reply(200, {
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           dataUri: 'https://jirkachadima.cz/wt/http/index.json',
@@ -318,7 +318,7 @@ describe('services.crawler.fetcher', () => {
           ratePlansUri: 'https://jirkachadima.cz/wt/http/rate-plans.json',
           availabilityUri: 'https://jirkachadima.cz/wt/http/availability.json',
         });
-      const result = await fetcher.fetchDataUris(hotelId);
+      const result = await fetcher.fetchDataUris(hotelAddress);
       assert.equal(result.address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result.dataUri, 'https://jirkachadima.cz/wt/http/index.json');
       assert.equal(result.descriptionUri, 'https://jirkachadima.cz/wt/http/description.json');
@@ -326,21 +326,21 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.availabilityUri, 'https://jirkachadima.cz/wt/http/availability.json');
     });
 
-    it('should throw when hotelId is not passed', async () => {
+    it('should throw when hotelAddress is not passed', async () => {
       try {
         await fetcher.fetchDataUris();
         throw new Error('should have never been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
 
     it('should throw on non-success response', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/dataUris`)
+        .get(`/hotels/${hotelAddress}/dataUris`)
         .reply(502);
       try {
-        await fetcher.fetchDataUris(hotelId);
+        await fetcher.fetchDataUris(hotelAddress);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);
@@ -350,7 +350,7 @@ describe('services.crawler.fetcher', () => {
 
   describe('fetchDesciption', () => {
     const readApiUrl = 'https://read-api.wt.com',
-      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
@@ -361,27 +361,27 @@ describe('services.crawler.fetcher', () => {
 
     it('should return description object', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`)
+        .get(`/hotels/${hotelAddress}?fields=${DESCRIPTION_FIELDS.join(',')}`)
         .reply(200, hotelData.DESCRIPTION);
-      const result = await fetcher.fetchDescription(hotelId);
+      const result = await fetcher.fetchDescription(hotelAddress);
       assert.deepEqual(result, hotelData.DESCRIPTION);
     });
 
-    it('should throw when hotelId is not passed', async () => {
+    it('should throw when hotelAddress is not passed', async () => {
       try {
         await fetcher.fetchDescription();
         throw new Error('should have never been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
 
     it('should throw on non-success response', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`)
+        .get(`/hotels/${hotelAddress}?fields=${DESCRIPTION_FIELDS.join(',')}`)
         .reply(502);
       try {
-        await fetcher.fetchDescription(hotelId);
+        await fetcher.fetchDescription(hotelAddress);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);
@@ -391,7 +391,7 @@ describe('services.crawler.fetcher', () => {
 
   describe('fetchRatePlans', () => {
     const readApiUrl = 'https://read-api.wt.com',
-      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
@@ -402,27 +402,27 @@ describe('services.crawler.fetcher', () => {
 
     it('should return description object', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/ratePlans`)
+        .get(`/hotels/${hotelAddress}/ratePlans`)
         .reply(200, hotelData.RATE_PLANS);
-      const result = await fetcher.fetchRatePlans(hotelId);
+      const result = await fetcher.fetchRatePlans(hotelAddress);
       assert.deepEqual(result, hotelData.RATE_PLANS);
     });
 
-    it('should throw when hotelId is not passed', async () => {
+    it('should throw when hotelAddress is not passed', async () => {
       try {
         await fetcher.fetchRatePlans();
         throw new Error('should have never been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
 
     it('should throw on non-success response', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/ratePlans`)
+        .get(`/hotels/${hotelAddress}/ratePlans`)
         .reply(502);
       try {
-        await fetcher.fetchRatePlans(hotelId);
+        await fetcher.fetchRatePlans(hotelAddress);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);
@@ -432,7 +432,7 @@ describe('services.crawler.fetcher', () => {
 
   describe('fetchAvailability', () => {
     const readApiUrl = 'https://read-api.wt.com',
-      hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
@@ -443,27 +443,27 @@ describe('services.crawler.fetcher', () => {
 
     it('should return description object', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/availability`)
+        .get(`/hotels/${hotelAddress}/availability`)
         .reply(200, hotelData.AVAILABILITY);
-      const result = await fetcher.fetchAvailability(hotelId);
+      const result = await fetcher.fetchAvailability(hotelAddress);
       assert.deepEqual(result, hotelData.AVAILABILITY);
     });
 
-    it('should throw when hotelId is not passed', async () => {
+    it('should throw when hotelAddress is not passed', async () => {
       try {
         await fetcher.fetchAvailability();
         throw new Error('should have never been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
 
     it('should throw on non-success response', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelId}/availability`)
+        .get(`/hotels/${hotelAddress}/availability`)
         .reply(502);
       try {
-        await fetcher.fetchAvailability(hotelId);
+        await fetcher.fetchAvailability(hotelAddress);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);

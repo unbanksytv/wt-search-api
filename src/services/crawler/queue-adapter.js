@@ -6,7 +6,7 @@ const crawler = new Crawler(Object.assign({}, crawlerOpts, {
 }));
 
 const syncHotel = (payload) => {
-  crawler.syncHotel(payload.hotelId);
+  crawler.syncHotel(payload.hotelAddress);
 };
 
 const initialSync = () => {
@@ -14,7 +14,7 @@ const initialSync = () => {
 };
 
 const syncHotelPart = (payload) => {
-  crawler.syncHotelPart(payload.hotelId, payload.partName);
+  crawler.syncHotelPart(payload.hotelAddress, payload.partName);
 };
 
 module.exports = {

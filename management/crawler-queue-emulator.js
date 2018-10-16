@@ -10,7 +10,7 @@ const eventuallyEnqueueHotelResync = (address) => {
     Queue.get().enqueue({
       type: 'syncHotel',
       payload: {
-        hotelId: address
+        hotelAddress: address
       }
     });
     eventuallyEnqueueHotelResync(address);
@@ -31,7 +31,7 @@ const doStuff = async () => {
   Queue.get().enqueue({
       type: 'syncHotelPart',
       payload: {
-        hotelId: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
+        hotelAddress: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
         partName: 'ratePlans'
       }
     });

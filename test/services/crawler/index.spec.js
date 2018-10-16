@@ -8,7 +8,7 @@ const { Crawler } = require('../../../src/services/crawler');
 const { FetcherRemoteError } = require('../../../src/services/crawler/fetcher');
 const HotelModel = require('../../../src/db/permanent/models/hotel');
 
-describe('services.crawler.fetcher', () => {
+describe('services.crawler.index', () => {
   beforeEach(async () => {
     await resetDB();
   });
@@ -56,8 +56,8 @@ describe('services.crawler.fetcher', () => {
       });
       syncHotelStub = sinon.stub().resolves([0]);
       fetchHotelListStub = sinon.stub().callsFake((opts) => {
-        opts.onEveryPage && opts.onEveryPage({ ids: [1, 2, 3] });
-        return Promise.resolve({ ids: [1, 2, 3] });
+        opts.onEveryPage && opts.onEveryPage({ addresses: [1, 2, 3] });
+        return Promise.resolve({ addresses: [1, 2, 3] });
       });
       crawler.getFetcher = sinon.stub().returns({
         fetchHotelList: fetchHotelListStub,
@@ -181,12 +181,12 @@ describe('services.crawler.fetcher', () => {
       createSpy.restore();
     });
 
-    it('should throw when hotelId is missing', async () => {
+    it('should throw when hotelAddress is missing', async () => {
       try {
         await crawler.syncHotel();
         throw new Error('should have not been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
   });
@@ -248,12 +248,12 @@ describe('services.crawler.fetcher', () => {
       }
     });
 
-    it('should throw when hotelId is missing', async () => {
+    it('should throw when hotelAddress is missing', async () => {
       try {
         await crawler.syncHotelPart();
         throw new Error('should have not been called');
       } catch (e) {
-        assert.match(e.message, /hotelId is required/i);
+        assert.match(e.message, /hotelAddress is required/i);
       }
     });
 

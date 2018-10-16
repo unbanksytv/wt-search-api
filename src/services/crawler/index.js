@@ -36,9 +36,9 @@ class Crawler {
       this.config.logger.debug('Fetching hotel list');
       await this.getFetcher().fetchHotelList({
         onEveryPage: (hotels) => {
-          for (let hotelId of hotels.ids) {
+          for (let hotelAddress of hotels.addresses) {
             syncPromises.push(
-              this.syncHotel(hotelId)
+              this.syncHotel(hotelAddress)
             );
           }
         },
@@ -50,13 +50,13 @@ class Crawler {
     }
   }
 
-  async syncHotel (hotelId) {
-    if (!hotelId) {
-      throw new CrawlerError('hotelId is required to syncHotel.');
+  async syncHotel (hotelAddress) {
+    if (!hotelAddress) {
+      throw new CrawlerError('hotelAddress is required to syncHotel.');
     }
-    this.config.logger.debug(`Fetching ${hotelId} /dataUris`);
+    this.config.logger.debug(`Fetching ${hotelAddress} /dataUris`);
     try {
-      const indexData = await this.syncHotelPart(hotelId, 'dataUris');
+      const indexData = await this.syncHotelPart(hotelAddress, 'dataUris');
       const dataUris = indexData.rawData;
       const parts = HotelModel.HOTEL_PART_NAMES.filter((p) => {
         return typeof dataUris[`${p}Uri`] === 'string';
@@ -65,52 +65,52 @@ class Crawler {
       for (let hotelPartName of parts) {
         hotelPartPromises.push((async () => {
           try {
-            const rawData = await this._fetchHotelPart(hotelId, hotelPartName);
+            const rawData = await this._fetchHotelPart(hotelAddress, hotelPartName);
             return {
               rawData: rawData,
               partName: hotelPartName,
             };
           } catch (e) {
-            this.logError(e, `Fetching hotel part error: ${hotelId}:${hotelPartName} - ${e.message}`);
+            this.logError(e, `Fetching hotel part error: ${hotelAddress}:${hotelPartName} - ${e.message}`);
           }
         })());
       }
       const hotelData = (await Promise.all(hotelPartPromises)).map((part) => {
         if (part) {
           return {
-            address: hotelId,
+            address: hotelAddress,
             partName: part.partName,
             rawData: part.rawData,
           };
         }
       }).filter((p) => !!p);
-      this.config.logger.debug(`Saving ${hotelId} into database`);
+      this.config.logger.debug(`Saving ${hotelAddress} into database`);
       return HotelModel.create(hotelData);
     } catch (e) {
-      this.logError(e, `Fetching hotel part error: ${hotelId}:dataUris - ${e.message}`);
+      this.logError(e, `Fetching hotel part error: ${hotelAddress}:dataUris - ${e.message}`);
     };
   }
 
-  _fetchHotelPart (hotelId, partName) {
+  _fetchHotelPart (hotelAddress, partName) {
     const fetcher = this.getFetcher(),
       methodName = `fetch${partName.charAt(0).toUpperCase() + partName.slice(1)}`;
-    this.config.logger.debug(`Fetching ${partName} for ${hotelId}`);
-    return fetcher[methodName](hotelId);
+    this.config.logger.debug(`Fetching ${partName} for ${hotelAddress}`);
+    return fetcher[methodName](hotelAddress);
   }
 
-  async syncHotelPart (hotelId, partName) {
-    if (!hotelId) {
-      throw new CrawlerError('hotelId is required to syncHotelPart.');
+  async syncHotelPart (hotelAddress, partName) {
+    if (!hotelAddress) {
+      throw new CrawlerError('hotelAddress is required to syncHotelPart.');
     }
     if (!partName) {
       throw new CrawlerError('partName is required to syncHotelPart.');
     }
-    const rawData = await this._fetchHotelPart(hotelId, partName);
-    this.config.logger.debug(`Saving ${hotelId} into database`);
+    const rawData = await this._fetchHotelPart(hotelAddress, partName);
+    this.config.logger.debug(`Saving ${hotelAddress} into database`);
     return {
       rawData: rawData,
       db: await HotelModel.create({
-        address: hotelId,
+        address: hotelAddress,
         partName: partName,
         rawData: rawData,
       }),

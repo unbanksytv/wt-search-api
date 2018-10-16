@@ -55,17 +55,17 @@ class Fetcher {
   }
 
   async _appendNextPage (options) {
-    const nextItems = await this._fetchHotelIds(Object.assign({
+    const nextItems = await this._fetchHotelAddresses(Object.assign({
       url: options.previousResult.next,
     }, options));
     return {
-      ids: options.previousResult.ids.concat(nextItems.ids),
+      addresses: options.previousResult.addresses.concat(nextItems.addresses),
       errors: options.previousResult.errors ? options.previousResult.errors.concat(nextItems.errors) : nextItems.errors,
       next: nextItems.next,
     };
   }
 
-  _fetchHotelIds (options) {
+  _fetchHotelAddresses (options) {
     const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
     if (options.url && !options.url.match(expectedUrl)) {
       throw new FetcherError(`${options.url} does not look like hotels list URI`);
@@ -78,7 +78,7 @@ class Fetcher {
         mappedItems = items.map((a) => a.id),
         mappedErrors = response.body.errors && response.body.errors.map((a) => a.data && a.data.id).filter((f) => !!f),
         result = {
-          ids: mappedItems,
+          addresses: mappedItems,
           errors: mappedErrors,
           next: response.body.next,
         };
@@ -97,9 +97,9 @@ class Fetcher {
     });
   }
 
-  _fetchHotelResource (hotelId, url) {
-    if (!hotelId) {
-      throw new FetcherError('hotelId is required');
+  _fetchHotelResource (hotelAddress, url) {
+    if (!hotelAddress) {
+      throw new FetcherError('hotelAddress is required');
     }
     return this._getSingleUrl(url, (response) => {
       return response.body;
@@ -107,26 +107,26 @@ class Fetcher {
   }
 
   fetchHotelList (options = {}) {
-    return this._fetchHotelIds(Object.assign({}, {
+    return this._fetchHotelAddresses(Object.assign({}, {
       counter: 1,
       url: `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
     }, options));
   };
 
-  fetchDataUris (hotelId) {
-    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/dataUris`);
+  fetchDataUris (hotelAddress) {
+    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/dataUris`);
   };
 
-  fetchDescription (hotelId) {
-    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}?fields=${DESCRIPTION_FIELDS.join(',')}`);
+  fetchDescription (hotelAddress) {
+    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}?fields=${DESCRIPTION_FIELDS.join(',')}`);
   };
 
-  fetchRatePlans (hotelId) {
-    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/ratePlans`);
+  fetchRatePlans (hotelAddress) {
+    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/ratePlans`);
   };
 
-  fetchAvailability (hotelId) {
-    return this._fetchHotelResource(hotelId, `${this.config.readApiUrl}/hotels/${hotelId}/availability`);
+  fetchAvailability (hotelAddress) {
+    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/availability`);
   };
 }
 
