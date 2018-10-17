@@ -124,7 +124,7 @@ describe('models.hotel', () => {
       });
     });
 
-    it('should select all data parts', async () => {
+    it('should select all data parts by default', async () => {
       const result = await Hotel.getLatestHotelData(hotelId);
       assert.equal(result.address, hotelId);
       assert.isDefined(result.data);
@@ -132,6 +132,14 @@ describe('models.hotel', () => {
       assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
       assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
       assert.isUndefined(result.data.dataUris);
+    });
+
+    it('should optionally limit the selection of data parts', async () => {
+      const result = await Hotel.getLatestHotelData(hotelId, ['ratePlans']);
+      assert.equal(result.address, hotelId);
+      assert.property(result.data, 'ratePlans');
+      assert.notProperty(result.data, 'description');
+      assert.notProperty(result.data, 'availability');
     });
 
     it('should select only the latest part of the same type', async () => {

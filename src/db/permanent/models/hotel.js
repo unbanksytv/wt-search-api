@@ -36,16 +36,16 @@ const create = (hotelData) => {
     }));
 };
 
-const getLatestHotelData = async (hotelAddress) => {
-  const partNames = ['description', 'ratePlans', 'availability'],
-    result = await db.from(HOTELS_TABLE).whereIn('id', function () {
-      this.union(partNames.map((partName) => function () {
-        this.from(HOTELS_TABLE).max('id').where({
-          'address': hotelAddress,
-          'part_name': partName,
-        });
-      }));
-    }).select('raw_data', 'part_name', 'id');
+const getLatestHotelData = async (hotelAddress, partNames) => {
+  partNames = partNames || ['description', 'ratePlans', 'availability'];
+  const result = await db.from(HOTELS_TABLE).whereIn('id', function () {
+    this.union(partNames.map((partName) => function () {
+      this.from(HOTELS_TABLE).max('id').where({
+        'address': hotelAddress,
+        'part_name': partName,
+      });
+    }));
+  }).select('raw_data', 'part_name', 'id');
 
   return result.map((p) => {
     return {
