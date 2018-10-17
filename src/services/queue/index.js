@@ -1,14 +1,12 @@
 const worker = require('./worker');
 
 /*
- * A queue to decouple API server from the outgoing requests
- * done by `workers`.
+ * A messaging queue to decouple individual components (crawler, indexer, ...).
  *
  * Currently, we utilize the internal queue of node.js. It is
  * possible that this will be replaced by a proper standalone
  * message queue in the future.
  *
- * Kudos to Hynek's work in wt-update-api
  */
 class Queue {
   enqueue (message) {
