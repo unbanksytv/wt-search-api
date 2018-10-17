@@ -6,17 +6,17 @@ const byLocation = require('../../../src/services/indexer/indices/by-location');
 const Indexer = require('../../../src/services/indexer');
 
 describe('services.indexer.index', () => {
-  describe('_getHotelAddresses', () => {
-    const indexer = new Indexer();
-    beforeEach(async () => {
-      await resetDB();
-      await Location.upsert('0xdummy0', 10, 10);
-      await Location.upsert('0xdummy1', 11, 11);
-      await Location.upsert('0xdummy2', 12, 12);
-      await Location.upsert('0xdummy3', 13, 13);
-      await Location.upsert('0xdummy4', 14, 14);
-    });
+  const indexer = new Indexer();
+  beforeEach(async () => {
+    await resetDB();
+    await Location.upsert('0xdummy0', 10, 10);
+    await Location.upsert('0xdummy1', 11, 11);
+    await Location.upsert('0xdummy2', 12, 12);
+    await Location.upsert('0xdummy3', 13, 13);
+    await Location.upsert('0xdummy4', 14, 14);
+  });
 
+  describe('_getHotelAddresses', () => {
     it('should return addresses based on the filtering conditions', async () => {
       const filter = byLocation._getFilter(11.01, 11.01, 10),
         addresses = await indexer._getHotelAddresses([filter]);
@@ -55,17 +55,6 @@ describe('services.indexer.index', () => {
   });
 
   describe('lookup', () => {
-    const indexer = new Indexer();
-
-    beforeEach(async () => {
-      await resetDB();
-      await Location.upsert('0xdummy0', 10, 10);
-      await Location.upsert('0xdummy1', 11, 11);
-      await Location.upsert('0xdummy2', 12, 12);
-      await Location.upsert('0xdummy3', 13, 13);
-      await Location.upsert('0xdummy4', 14, 14);
-    });
-
     it('should return addresses based on the query', async () => {
       const query = {
           filters: [
