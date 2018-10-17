@@ -2,6 +2,7 @@ const { assert } = require('chai');
 
 const { resetDB } = require('../../../src/db/indexed');
 const Location = require('../../../src/db/indexed/models/location');
+const byLocation = require('../../../src/services/indexer/indices/by-location');
 const Indexer = require('../../../src/services/indexer');
 
 describe('services.indexer.index', () => {
@@ -17,13 +18,13 @@ describe('services.indexer.index', () => {
     });
 
     it('should return addresses based on the filtering conditions', async () => {
-      const filter = Location.getFilter(11.01, 11.01, 10),
+      const filter = byLocation._getFilter(11.01, 11.01, 10),
         addresses = await indexer._getHotelAddresses([filter]);
       assert.deepEqual(addresses, ['0xdummy1']);
     });
 
     it('should sort addresses based on the sorting condition', async () => {
-      const sorting = Location.getSorting(13.01, 13.01),
+      const sorting = byLocation._getSorting(13.01, 13.01),
         addresses = await indexer._getHotelAddresses(undefined, sorting);
       assert.deepEqual(addresses, [
         '0xdummy3',
@@ -35,8 +36,8 @@ describe('services.indexer.index', () => {
     });
 
     it('should allow a combination of multiple filters', async () => {
-      const filter1 = Location.getFilter(11.5, 11.5, 120),
-        filter2 = Location.getFilter(12.5, 12.5, 120);
+      const filter1 = byLocation._getFilter(11.5, 11.5, 120),
+        filter2 = byLocation._getFilter(12.5, 12.5, 120);
       let addresses = await indexer._getHotelAddresses([filter1]);
       assert.deepEqual(addresses, ['0xdummy1', '0xdummy2']);
       addresses = await indexer._getHotelAddresses([filter2]);
@@ -46,8 +47,8 @@ describe('services.indexer.index', () => {
     });
 
     it('should allow a combination of filtering and sorting', async () => {
-      const filter = Location.getFilter(11.5, 11.5, 120),
-        sorting = Location.getSorting(20, 20),
+      const filter = byLocation._getFilter(11.5, 11.5, 120),
+        sorting = byLocation._getSorting(20, 20),
         addresses = await indexer._getHotelAddresses([filter], sorting);
       assert.deepEqual(addresses, ['0xdummy2', '0xdummy1']);
     });
