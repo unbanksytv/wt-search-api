@@ -6,6 +6,52 @@ const byLocation = require('../../../../src/services/indexer/indices/by-location
 const Location = require('../../../../src/db/indexed/models/location');
 
 describe('indices.by-location', () => {
+  describe('indexHotel', () => {
+    beforeEach(async () => {
+      await resetDB();
+    });
+
+    it('should create a new Location record with the appropriate data', async () => {
+      await byLocation.indexHotel({
+        address: '0xdummy',
+        data: {
+          description: { location: { latitude: 40, longitude: 40 } },
+        },
+      });
+      const data = await db(Location.TABLE).select('hotel_address', 'lat', 'lng');
+      assert.deepEqual(data, [{
+        'hotel_address': '0xdummy',
+        'lat': 40,
+        'lng': 40,
+      }]);
+    });
+
+    it('should overwrite an existing Location record', async () => {
+      await Location.upsert('0xdummy', 40, 40);
+      await byLocation.indexHotel({
+        address: '0xdummy',
+        data: {
+          description: { location: { latitude: 80, longitude: 80 } },
+        },
+      });
+      const data = await db(Location.TABLE).select('hotel_address', 'lat', 'lng');
+      assert.deepEqual(data, [{
+        'hotel_address': '0xdummy',
+        'lat': 80,
+        'lng': 80,
+      }]);
+    });
+
+    it('should not create anything when hotel has no location', async () => {
+      await byLocation.indexHotel({
+        address: '0xdummy',
+        data: { description: {} },
+      });
+      const data = await db(Location.TABLE).select('hotel_address', 'lat', 'lng');
+      assert.deepEqual(data, []);
+    });
+  });
+
   describe('_convertKilometersToDegrees', () => {
     // These test cases have been created using a map.
     it('should approximately convert kilometers to degrees for short distances', async () => {

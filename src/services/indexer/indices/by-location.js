@@ -69,6 +69,11 @@ function _getFilter (lat, lng, distance) {
  * Return the expression for ordering by (approximate) distance
  * from the given point.
  *
+ * NOTE: In order to retain portability across SQL backends, we
+ * do not rely on any native geospatial functions of the
+ * database. As a result, however, the ordering does not use
+ * indices.
+ *
  * @param {Number} lat in degrees
  * @param {Number} lng in degrees
  * @return {Object}
@@ -127,7 +132,19 @@ function getSorting (query) {
   return _getSorting(query.sorting.data.lat, query.sorting.data.lng);
 }
 
-const indexData = () => {};
+/**
+* Index a single hotel.
+*
+* @param {hotel} hotel as returned from Hotel.getLatestHotelData.
+* @return {Promise<void>}
+*
+*/
+async function indexHotel (hotel) {
+  const coords = hotel.data.description && hotel.data.description.location;
+  if (coords) {
+    await Location.upsert(hotel.address, coords.latitude, coords.longitude);
+  }
+}
 
 module.exports = {
   _convertKilometersToDegrees,
@@ -135,5 +152,5 @@ module.exports = {
   _getSorting,
   getFiltering,
   getSorting,
-  indexData,
+  indexHotel,
 };

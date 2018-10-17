@@ -1,22 +1,28 @@
 const byLocation = require('./indices/by-location');
-const HotelModel = require('../../db/permanent/models/hotel');
 const { db } = require('../../config');
 
 const INDEXERS = [
   byLocation,
-//  byTextualData
 ];
 
+/**
+ * Implements hotel indexing and subsequent retrieval by
+ * filtering and sorting criteria.
+ *
+ * Right now the indexer is based on plain portable SQL without
+ * commitment to a specific backend.
+ */
 class Indexer {
-  loadHotelData (hotelId) {
-    return HotelModel.getLatestHotelData(hotelId);
-  }
-
-  indexHotel (hotelId) {
-    const hotelData = this.loadHotelData(hotelId);
-    for (let i = 0; INDEXERS.length; i += 1) {
-      const indexer = INDEXERS[i];
-      indexer.indexData(hotelData);
+  /**
+  * Index a single hotel.
+  *
+  * @param {hotel} hotel as returned from Hotel.getLatestHotelData.
+  * @return {Promise<void>}
+  *
+  */
+  async indexHotel (hotel) {
+    for (let indexer of INDEXERS) {
+      await indexer.indexHotel(hotel);
     }
   }
 
@@ -95,9 +101,9 @@ class Indexer {
   *   },
   * }
   *
-  * (This example filters hotels that are further away than 20
-  * kilometers from the [10, 10] coordinates and sorts the list
-  * by distance from the same location.)
+  * (This example filters hotels that are at max 20 kilometers
+  * away from the [10, 10] coordinates and sorts the list by
+  * distance from the same location.)
   *
   * @param {Object} query
   * @return {Promise<Array>}
