@@ -92,6 +92,4 @@ class Indexer {
   }
 }
 
-module.exports = {
-  Indexer,
-};
+module.exports = Indexer;

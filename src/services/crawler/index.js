@@ -118,6 +118,4 @@ class Crawler {
   }
 }
 
-module.exports = {
-  Crawler,
-};
+module.exports = Crawler;

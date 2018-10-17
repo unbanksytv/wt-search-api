@@ -2,7 +2,7 @@ const { assert } = require('chai');
 
 const { resetDB } = require('../../../src/db/indexed');
 const Location = require('../../../src/db/indexed/models/location');
-const { Indexer } = require('../../../src/services/indexer');
+const Indexer = require('../../../src/services/indexer');
 
 describe('services.indexer.index', () => {
   describe('_getHotelAddresses', () => {

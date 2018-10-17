@@ -1,4 +1,4 @@
-const { Crawler } = require('../crawler');
+const Crawler = require('../crawler');
 const { logger, crawlerOpts } = require('../../config');
 
 const crawler = new Crawler(Object.assign({}, crawlerOpts, {
