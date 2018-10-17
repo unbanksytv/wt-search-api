@@ -135,7 +135,7 @@ describe('services.crawler.index', () => {
       await crawler.syncHotel('0xdummy');
       assert.equal(createSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
-        .from(HotelModel.HOTELS_TABLE);
+        .from(HotelModel.TABLE);
       assert.equal(result.length, 4);
       assert.equal(result[0].address, '0xdummy');
       assert.equal(result[0].part_name, 'dataUris');
@@ -158,7 +158,7 @@ describe('services.crawler.index', () => {
       assert.equal(fetchDataUrisStub.callCount, 1);
       assert.equal(createSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
-        .from(HotelModel.HOTELS_TABLE);
+        .from(HotelModel.TABLE);
       assert.equal(result.length, 3);
       assert.equal(result[0].address, '0xdummy');
       assert.equal(result[0].part_name, 'dataUris');
@@ -228,7 +228,7 @@ describe('services.crawler.index', () => {
       await crawler.syncHotelPart('0xdummy', 'description');
       await crawler.syncHotelPart('0xdummy', 'ratePlans');
       const result = await db.select('address', 'part_name', 'raw_data')
-        .from(HotelModel.HOTELS_TABLE);
+        .from(HotelModel.TABLE);
       assert.equal(result.length, 2);
       assert.equal(result[0].address, '0xdummy');
       assert.equal(result[0].part_name, 'description');

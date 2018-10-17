@@ -1,13 +1,13 @@
 const { db } = require('../../../config');
 
-const HOTELS_TABLE = 'hotels',
-  HOTEL_PART_NAMES = ['description', 'ratePlans', 'availability', 'dataUris'];
+const TABLE = 'hotels',
+  PART_NAMES = ['description', 'ratePlans', 'availability', 'dataUris'];
 
 const createTable = async () => {
-  await db.schema.createTable(HOTELS_TABLE, (table) => {
+  await db.schema.createTable(TABLE, (table) => {
     table.increments('id');
     table.string('address', 63).notNullable();
-    table.enu('part_name', HOTEL_PART_NAMES).notNullable();
+    table.enu('part_name', PART_NAMES).notNullable();
     table.json('raw_data').notNullable();
     table.timestamps(true, true);
 
@@ -16,7 +16,7 @@ const createTable = async () => {
 };
 
 const dropTable = async () => {
-  await db.schema.dropTableIfExists(HOTELS_TABLE);
+  await db.schema.dropTableIfExists(TABLE);
 };
 
 const create = (hotelData) => {
@@ -26,7 +26,7 @@ const create = (hotelData) => {
   // This actually returns a value from a numerical id column.
   // It's not very reliable and the behaviour depends on used
   // DB engine.
-  return db(HOTELS_TABLE)
+  return db(TABLE)
     .insert(hotelData.map((d) => {
       return {
         'address': d.address,
@@ -38,9 +38,9 @@ const create = (hotelData) => {
 
 const getLatestHotelData = async (hotelAddress, partNames) => {
   partNames = partNames || ['description', 'ratePlans', 'availability'];
-  const result = await db.from(HOTELS_TABLE).whereIn('id', function () {
+  const result = await db.from(TABLE).whereIn('id', function () {
     this.union(partNames.map((partName) => function () {
-      this.from(HOTELS_TABLE).max('id').where({
+      this.from(TABLE).max('id').where({
         'address': hotelAddress,
         'part_name': partName,
       });
@@ -66,6 +66,6 @@ module.exports = {
   dropTable,
   create,
   getLatestHotelData,
-  HOTELS_TABLE,
-  HOTEL_PART_NAMES,
+  TABLE,
+  PART_NAMES,
 };

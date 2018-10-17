@@ -58,7 +58,7 @@ class Crawler {
     try {
       const indexData = await this.syncHotelPart(hotelAddress, 'dataUris');
       const dataUris = indexData.rawData;
-      const parts = HotelModel.HOTEL_PART_NAMES.filter((p) => {
+      const parts = HotelModel.PART_NAMES.filter((p) => {
         return typeof dataUris[`${p}Uri`] === 'string';
       });
       const hotelPartPromises = [];
