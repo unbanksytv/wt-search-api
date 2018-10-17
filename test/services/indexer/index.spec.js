@@ -53,4 +53,34 @@ describe('services.indexer.index', () => {
       assert.deepEqual(addresses, ['0xdummy2', '0xdummy1']);
     });
   });
+
+  describe('lookup', () => {
+    const indexer = new Indexer();
+
+    beforeEach(async () => {
+      await resetDB();
+      await Location.upsert('0xdummy0', 10, 10);
+      await Location.upsert('0xdummy1', 11, 11);
+      await Location.upsert('0xdummy2', 12, 12);
+      await Location.upsert('0xdummy3', 13, 13);
+      await Location.upsert('0xdummy4', 14, 14);
+    });
+
+    it('should return addresses based on the query', async () => {
+      const query = {
+          filters: [
+            {
+              type: 'location',
+              condition: { lat: 11.5, lng: 11.5, distance: 120 },
+            },
+          ],
+          sorting: {
+            type: 'location',
+            data: { lat: 20, lng: 20 },
+          },
+        },
+        addresses = await indexer.lookup(query);
+      assert.deepEqual(addresses, ['0xdummy2', '0xdummy1']);
+    });
+  });
 });

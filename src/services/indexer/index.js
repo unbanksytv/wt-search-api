@@ -2,7 +2,7 @@ const byLocation = require('./indices/by-location');
 const HotelModel = require('../../db/permanent/models/hotel');
 const { db } = require('../../config');
 
-const indexers = [
+const INDEXERS = [
   byLocation,
 //  byTextualData
 ];
@@ -14,8 +14,8 @@ class Indexer {
 
   indexHotel (hotelId) {
     const hotelData = this.loadHotelData(hotelId);
-    for (let i = 0; indexers.length; i += 1) {
-      const indexer = indexers[i];
+    for (let i = 0; INDEXERS.length; i += 1) {
+      const indexer = INDEXERS[i];
       indexer.indexData(hotelData);
     }
   }
@@ -77,18 +77,45 @@ class Indexer {
     return data.map((item) => item.hotel_address);
   }
 
-  async lookupQuery (query) {
-    const ids = [];
-    for (let i = 0; indexers.length; i += 1) {
-      const indexer = indexers[i];
-      // split incoming query object
-      const queryPart = query;
-      const newIds = await indexer.lookupQuery(queryPart);
-      ids.concat(newIds);
-      // or composeQuery and run it against storage from here
-    }
-    // later somewhere resolve hotel data for all of these IDs and return them to the query originator
-    return ids;
+  /**
+  * Get a list of hotel addresses based on the input query.
+  *
+  * Query is an object like this:
+  *
+  * {
+  *   filters: [
+  *     {
+  *       type: 'location',
+  *       condition: { lat: 10, lng: 10, distance: 20 },
+  *     },
+  *   ],
+  *   sorting: {
+  *     type: 'location',
+  *     data: { lat: 10, lng: 10 },
+  *   },
+  * }
+  *
+  * (This example filters hotels that are further away than 20
+  * kilometers from the [10, 10] coordinates and sorts the list
+  * by distance from the same location.)
+  *
+  * @param {Object} query
+  * @return {Promise<Array>}
+  *
+  */
+  async lookup (query) {
+    let filtering = INDEXERS
+      .map((indexer) => indexer.getFiltering(query))
+      .filter(Boolean)
+      .reduce((prev, curr) => prev.concat(curr), []);
+    filtering = (filtering.length === 0) ? undefined : filtering;
+
+    const sorting = INDEXERS
+      .map((indexer) => indexer.getSorting(query))
+      .filter(Boolean)
+      .reduce((prev, curr) => prev || curr, undefined);
+
+    return this._getHotelAddresses(filtering, sorting);
   }
 }
 
