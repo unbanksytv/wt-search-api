@@ -1,4 +1,5 @@
 const crawlerAdapter = require('../crawler/queue-adapter');
+const indexerAdapter = require('../indexer/queue-adapter');
 
 module.exports.process = async (message) => {
   switch (message.type) {
@@ -10,6 +11,9 @@ module.exports.process = async (message) => {
     break;
   case 'initialSync':
     crawlerAdapter.initialSync();
+    break;
+  case 'indexHotel':
+    indexerAdapter.indexHotel(message.payload);
     break;
   default:
         // do nothing

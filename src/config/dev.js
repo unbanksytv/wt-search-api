@@ -4,6 +4,9 @@ const knex = require('knex');
 module.exports = {
   db: knex({
     client: 'sqlite',
+    connection: {
+      filename: './.dev.sqlite',
+    },
     useNullAsDefault: true,
   }),
   logger: winston.createLogger({
