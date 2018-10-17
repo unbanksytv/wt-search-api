@@ -87,4 +87,60 @@ describe('indices.by-location', () => {
       ]);
     });
   });
+
+  describe('getFiltering', () => {
+    it('should return an array of filters based on the query', async () => {
+      const query = {
+          filters: [
+            { type: 'location', condition: { lat: 10, lng: 10, distance: 2 } },
+            { type: 'location', condition: { lat: 11, lng: 11, distance: 12 } },
+            { type: 'dummy', condition: { dummy: 'dummy' } },
+          ],
+        },
+        filtering = byLocation.getFiltering(query);
+      assert.equal(filtering.length, 2);
+      assert.property(filtering[0], 'table');
+      assert.property(filtering[0], 'condition');
+      assert.property(filtering[1], 'table');
+      assert.property(filtering[1], 'condition');
+    });
+
+    it('should return return undefined if query contains no location filter', async () => {
+      const query = {
+        filters: [
+          { type: 'dummy', condition: { dummy: 'dummy' } },
+        ],
+      };
+      assert.equal(byLocation.getFiltering(query), undefined);
+    });
+
+    it('should return return undefined if query contains filters whatsoever', async () => {
+      const query = {};
+      assert.equal(byLocation.getFiltering(query), undefined);
+    });
+  });
+
+  describe('getSorting', () => {
+    it('should return a sorting representation based on the query', async () => {
+      const query = {
+          sorting: { type: 'location', data: { lat: 10, lng: 10 } },
+        },
+        sorting = byLocation.getSorting(query);
+      assert.property(sorting, 'table');
+      assert.property(sorting, 'columnName');
+      assert.property(sorting, 'select');
+    });
+
+    it('should return undefined if the sorting type is not "location"', async () => {
+      const query = {
+        sorting: { type: 'dummy', data: {} },
+      };
+      assert.equal(byLocation.getSorting(query), undefined);
+    });
+
+    it('should return undefined if no sorting is specified', async () => {
+      const query = {};
+      assert.equal(byLocation.getSorting(query), undefined);
+    });
+  });
 });

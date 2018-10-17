@@ -92,11 +92,48 @@ function _getSorting (lat, lng) {
   };
 };
 
+/**
+ * Extract filtering conditions from query.
+ *
+ * @param {Object} query
+ * @return {Array|undefined}
+ *
+ */
+function getFiltering (query) {
+  if (!query.filters) {
+    return undefined;
+  }
+  const filters = query.filters.filter((f) => f.type === 'location');
+  if (!filters.length) {
+    return undefined;
+  }
+  return filters.map((filter) => {
+    const cond = filter.condition;
+    return _getFilter(cond.lat, cond.lng, cond.distance);
+  });
+}
+
+/**
+ * Extract sorting condition from query.
+ *
+ * @param {Object} query
+ * @return {Object|undefined}
+ *
+ */
+function getSorting (query) {
+  if (!query.sorting || query.sorting.type !== 'location') {
+    return undefined;
+  }
+  return _getSorting(query.sorting.data.lat, query.sorting.data.lng);
+}
+
 const indexData = () => {};
 
 module.exports = {
   _convertKilometersToDegrees,
   _getFilter,
   _getSorting,
+  getFiltering,
+  getSorting,
   indexData,
 };
