@@ -8,10 +8,10 @@ const _processors = {
  * Register a worker processor for a given message type.
  **/
 module.exports.register = (messageType, processor) => {
-  if (!_processors.messageType) {
-    _processors.messageType = [];
+  if (!_processors[messageType]) {
+    _processors[messageType] = [];
   }
-  _processors.messageType.push(processor);
+  _processors[messageType].push(processor);
 };
 
 /*
