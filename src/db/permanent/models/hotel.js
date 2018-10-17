@@ -61,44 +61,10 @@ const getLatestHotelData = async (hotelAddress) => {
   });
 };
 
-/**
- * Get a list of hotel addresses based on the index filters.
- *
- * @param {Array} filters
- * @param {Function} sorting (optional)
- * @return {Promise<Array>}
- *
- */
-const getAddresses = async (filters, sorting) => {
-  const head = filters[0],
-    tail = filters.slice(1),
-    table = head.table;
-  let query = db(table);
-  for (let filter of tail) {
-    query = query.innerJoin(table, `${table}.hotel_address`, '=', `${filter.table}.hotel_address`);
-  }
-  query = query.where(head.condition);
-  for (let filter of tail) {
-    query = query.andWhere(filter.condition);
-  }
-
-  if (sorting) {
-    const filterTables = filters.map((x) => x.table);
-    if (filterTables.indexOf(sorting.table) === -1) {
-      query = query.innerJoin(sorting.table, `${table}.hotel_address`, '=', `${sorting.table}.hotel_address`);
-    }
-    query.select(sorting.select).orderBy(sorting.columnName);
-  }
-
-  const data = await query.select(`${table}.hotel_address`);
-  return data.map((item) => item.hotel_address);
-};
-
 module.exports = {
   createTable,
   dropTable,
   create,
-  getAddresses,
   getLatestHotelData,
   HOTELS_TABLE,
   HOTEL_PART_NAMES,
