@@ -1,3 +1,4 @@
+const { logger } = require('../../config');
 const Hotel = require('../../db/permanent/models/hotel');
 const Indexer = require('./index');
 const worker = require('../queue/worker');
@@ -5,7 +6,9 @@ const worker = require('../queue/worker');
 const indexer = new Indexer();
 
 async function indexHotel (payload) {
-  const hotel = await Hotel.getLatestHotelData(payload.hotelAddress);
+  const hotelAddress = payload.hotelAddress;
+  logger.debug(`Indexing hotel ${hotelAddress}`);
+  const hotel = await Hotel.getLatestHotelData(hotelAddress);
   await indexer.indexHotel(hotel);
 };
 

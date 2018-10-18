@@ -2,9 +2,12 @@ const Crawler = require('../crawler');
 const { logger, crawlerOpts } = require('../../config');
 const worker = require('../queue/worker');
 
-const crawler = new Crawler(Object.assign({}, crawlerOpts, {
+const crawler = new Crawler(Object.assign({}, {
   logger: logger,
-}));
+  // If set to true, the indexer will be triggered for each
+  // saved hotel.
+  triggerIndexing: false,
+}, crawlerOpts));
 
 const syncHotel = (payload) => {
   return crawler.syncHotel(payload.hotelAddress);

@@ -1,3 +1,4 @@
+const Queue = require('../queue');
 const { Fetcher, FetcherRemoteError } = require('./fetcher');
 const HotelModel = require('../../db/permanent/models/hotel');
 
@@ -10,6 +11,7 @@ class Crawler {
       throw new CrawlerInitializationError('logger is required in options!');
     }
     this.config = options;
+    this.queue = Queue.get();
   }
 
   logError (err, message) {
@@ -86,7 +88,10 @@ class Crawler {
       }).filter((p) => !!p);
       if (hotelData.length !== 0) {
         this.config.logger.debug(`Saving ${hotelAddress} into database`);
-        return HotelModel.create(hotelData);
+        await HotelModel.create(hotelData);
+        if (this.config.triggerIndexing) {
+          this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
+        }
       } else {
         this.config.logger.debug(`No data for ${hotelAddress} available`);
       }
