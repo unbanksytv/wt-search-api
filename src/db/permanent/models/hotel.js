@@ -20,6 +20,9 @@ const dropTable = async () => {
 };
 
 const create = (hotelData) => {
+  if (!hotelData || hotelData.length === 0) {
+    return;
+  }
   if (!Array.isArray(hotelData)) {
     hotelData = [hotelData];
   }
