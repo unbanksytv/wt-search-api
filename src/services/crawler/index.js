@@ -84,8 +84,12 @@ class Crawler {
           };
         }
       }).filter((p) => !!p);
-      this.config.logger.debug(`Saving ${hotelAddress} into database`);
-      return HotelModel.create(hotelData);
+      if (hotelData.length !== 0) {
+        this.config.logger.debug(`Saving ${hotelAddress} into database`);
+        return HotelModel.create(hotelData);
+      } else {
+        this.config.logger.debug(`No data for ${hotelAddress} available`);
+      }
     } catch (e) {
       this.logError(e, `Fetching hotel part error: ${hotelAddress}:dataUris - ${e.message}`);
     };

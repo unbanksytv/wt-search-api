@@ -21,7 +21,7 @@ const dropTable = async () => {
 
 const create = (hotelData) => {
   if (!hotelData || hotelData.length === 0) {
-    return;
+    throw new Error('No hotel data provided.');
   }
   if (!Array.isArray(hotelData)) {
     hotelData = [hotelData];
