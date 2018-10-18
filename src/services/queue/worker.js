@@ -22,7 +22,15 @@ module.exports.process = (message) => {
   const processors = _processors[message.type];
   if (processors) {
     for (let processor of processors) {
-      processor(message.payload);
+      (async () => {
+        try {
+          await processor(message.payload);
+        } catch (err) {
+          // Catch errors even without awaiting to avoid
+          // unhandled promise rejections.
+          logger.error(`Unexpected error when processing message ${message.type}: ${err.message}`);
+        }
+      })();
     }
   } else {
     logger.warn(`Unknown message type: ${message.type}`);

@@ -7,26 +7,26 @@ const crawler = new Crawler(Object.assign({}, crawlerOpts, {
 }));
 
 const syncHotel = (payload) => {
-  crawler.syncHotel(payload.hotelAddress);
+  return crawler.syncHotel(payload.hotelAddress);
 };
 
 const initialSync = () => {
-  crawler.syncAllHotels();
+  return crawler.syncAllHotels();
 };
 
 const syncHotelPart = (payload) => {
-  crawler.syncHotelPart(payload.hotelAddress, payload.partName);
+  return crawler.syncHotelPart(payload.hotelAddress, payload.partName);
 };
 
 const registerProcessors = () => {
   worker.register('syncHotel', (data) => {
-    syncHotel(data);
+    return syncHotel(data);
   });
   worker.register('syncHotelPart', (data) => {
-    syncHotelPart(data);
+    return syncHotelPart(data);
   });
   worker.register('initialSync', (data) => {
-    initialSync();
+    return initialSync();
   });
 };
 
