@@ -1,0 +1,100 @@
+openapi: 3.0.0
+servers:
+  - description: Localhost
+    url: 'http://localhost:1918'
+info:
+  description: API for access to filterable and sortable cached collection of WT hotels.
+  version: 'will-be-set-at-runtime'
+  title: WT search API
+paths:
+  /:
+    get:
+      summary: API info
+      responses:
+        '200':
+          description: Basic information about this API instance.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  docs:
+                    type: string
+                    description: Link to the API documentation.
+                  info:
+                    type: string
+                    description: Link to more information about the API.
+                  version:
+                    type: string
+                    description: Deployed API version number.
+                  config:
+                    type: string
+                    description: Which config is the API using.
+  /hotels:
+    get:
+      summary: Get a list of hotels.
+      parameters:
+        - name: filter
+          in: query
+          description: Definition of the filters in JSON format.
+          required: false
+          schema:
+            type: string
+            format: json
+        - name: sort
+          in: query
+          description: Sorting criteria.
+          required: false
+          schema:
+            type: string
+            enum:
+              - distance
+              - -distance
+      responses:
+        '200':
+          description: A list of hotels matching the input criteria.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    description: List of resolved hotels.
+                    items:
+                      $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/3e9f47badeb20d4cf1082e787952ccc4da714e16/docs/swagger.yaml#/components/schemas/HotelListItem
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+components:
+  responses:
+    BadRequestError:
+      description: The server does not understand the request (HTTP code 400)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnprocessableEntityError:
+      description: Request body or params validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      title: Error
+      description: Default schema for errors returned by API.
+      properties:
+        status:
+          type: number
+          description: HTTP status
+        code:
+          type: string
+          description: Computer-readable error. Use this for comparison.
+        short:
+          type: string
+          description: Human-readable error with a short description of the error.
+        long:
+          type: string
+          description: Verbose explanation of what happened.
