@@ -43,13 +43,12 @@ paths:
             format: json
         - name: sort
           in: query
-          description: Sorting criteria.
+          description: Sorting criteria in JSON format.
           required: false
           schema:
+          schema:
             type: string
-            enum:
-              - distance
-              - -distance
+            format: json
       responses:
         '200':
           description: A list of hotels matching the input criteria.
