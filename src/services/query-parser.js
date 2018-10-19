@@ -1,36 +1,63 @@
-const { validateFilter, ValidationError } = require('./validators');
+const { validateFilter, validateSort, ValidationError } = require('./validators');
 
 class QueryParseError extends Error {};
 
 /**
- * Convert a GET query to filtering representation, if possible.
+ * Parse and validate a JSON-encoded GET parameter.
  *
- * @param {Object} query as returned from Hotel.getLatestHotelData.
+ * @param {Object} query request GET params
+ * @param {String} partName
+ * @param {Function} validateFn
+ * @return {Object}
+ *
+ */
+function getQueryPart (query, partName, validateFn) {
+  let part = query[partName];
+  if (!part) {
+    return;
+  }
+  try {
+    part = JSON.parse(part);
+  } catch (err) {
+    throw new QueryParseError(`Invalid JSON in '${partName}'.`);
+  }
+  try {
+    validateFn(part);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      throw new QueryParseError(`Invalid ${partName} definition.`);
+    }
+    throw err;
+  }
+  return part;
+}
+
+/**
+ * Extract filtering representation from the GET query, if
+ * applicable.
+ *
+ * @param {Object} query request GET params
  * @return {Array|undefined}
  *
  */
 function getFilters (query) {
-  let filter = query.filter;
-  if (!filter) {
-    return;
-  }
-  try {
-    filter = JSON.parse(filter);
-  } catch (err) {
-    throw new QueryParseError('Invalid JSON in `filter`.');
-  }
-  try {
-    validateFilter(filter);
-  } catch (err) {
-    if (err instanceof ValidationError) {
-      throw new QueryParseError('Invalid filter definition.');
-    }
-    throw err;
-  }
-  return filter;
+  return getQueryPart(query, 'filter', validateFilter);
+}
+
+/**
+ * Extract sorting representation from the GET query, if
+ * applicable.
+ *
+ * @param {Object} query request GET params
+ * @return {Object}
+ *
+ */
+function getSort (query) {
+  return getQueryPart(query, 'sort', validateSort);
 }
 
 module.exports = {
   QueryParseError,
   getFilters,
+  getSort,
 };

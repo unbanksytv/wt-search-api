@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getFilters, QueryParseError } = require('../../src/services/query-parser');
+const { getFilters, getSort, QueryParseError } = require('../../src/services/query-parser');
 
 describe('query-parser', function () {
   describe('getFilters', () => {
@@ -30,6 +30,32 @@ describe('query-parser', function () {
     it('should fail when the filter is not properly json-encoded', () => {
       const query = { filter: 'dummy' };
       assert.throws(() => getFilters(query), QueryParseError);
+    });
+  });
+
+  describe('getSort', () => {
+    it('should return the parsed sorting definition when the data is correct', () => {
+      const sort = { type: 'location', data: { lat: 10, lng: 10 } },
+        query = { sort: JSON.stringify(sort) },
+        parsed = getSort(query);
+      assert.deepEqual(parsed, sort);
+    });
+
+    it('should return undefined if no sorting is specified in the query', () => {
+      const query = {},
+        parsed = getSort(query);
+      assert.equal(parsed, undefined);
+    });
+
+    it('should fail when the sorting definition is wrong', () => {
+      const sort = { type: 'location', condition: { dummy: 'dummy' } },
+        query = { sort: JSON.stringify(sort) };
+      assert.throws(() => getSort(query), QueryParseError);
+    });
+
+    it('should fail when the sorting is not properly json-encoded', () => {
+      const query = { sort: 'dummy' };
+      assert.throws(() => getSort(query), QueryParseError);
     });
   });
 });
