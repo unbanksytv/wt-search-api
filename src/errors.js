@@ -30,11 +30,6 @@ Http404Error.defaultCode = 'notFound';
 Http404Error.defaultMsgShort = 'Page not found.';
 Http404Error.defaultMsgLong = 'This endpoint does not exist.';
 
-class HttpValidationError extends HttpError {};
-HttpValidationError.status = 422;
-HttpValidationError.defaultCode = 'validationFailed';
-HttpValidationError.defaultMsgShort = 'Validation did not pass.';
-
 class HttpInternalError extends HttpError {};
 HttpInternalError.status = 500;
 HttpInternalError.defaultCode = 'genericError';
@@ -45,6 +40,5 @@ module.exports = {
   HttpError,
   Http404Error,
   HttpBadRequestError,
-  HttpValidationError,
   HttpInternalError,
 };

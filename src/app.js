@@ -10,6 +10,7 @@ const YAML = require('yamljs');
 const config = require('./config');
 const { version } = require('../package.json');
 const { HttpError, HttpInternalError, Http404Error, HttpBadRequestError } = require('./errors');
+const hotels = require('./controllers/hotels');
 
 const app = express();
 
@@ -51,7 +52,7 @@ app.get('/', (req, res) => {
 });
 
 // Hotels
-// app.get('/hotels', hotels.getList);
+app.get('/hotels', hotels.getList);
 
 // 404 handler
 app.use('*', (req, res, next) => {

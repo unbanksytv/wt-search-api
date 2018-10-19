@@ -64,8 +64,6 @@ paths:
                       $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/3e9f47badeb20d4cf1082e787952ccc4da714e16/docs/swagger.yaml#/components/schemas/HotelListItem
         '400':
           $ref: '#/components/responses/BadRequestError'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntityError'
 components:
   responses:
     BadRequestError:

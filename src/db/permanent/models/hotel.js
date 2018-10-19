@@ -11,6 +11,7 @@ const createTable = async () => {
     table.json('raw_data').notNullable();
     table.timestamps(true, true);
 
+    table.index(['address']);
     table.index(['address', 'part_name', 'created_at']);
   });
 };
@@ -64,11 +65,26 @@ const getLatestHotelData = async (hotelAddress, partNames) => {
   });
 };
 
+/**
+ * Get a list of hotel addresses - used when no sorting
+ * filtering is requested.
+ *
+ * NOTE: This method is probably just temporary, therefore
+ * it's not directly tested.
+ *
+ * @return {Promise<Array>}
+ */
+const getAddresses = async () => {
+  const result = await db.from(TABLE).distinct('address').select();
+  return result.map((item) => item.address);
+};
+
 module.exports = {
   createTable,
   dropTable,
   create,
   getLatestHotelData,
+  getAddresses,
   TABLE,
   PART_NAMES,
 };
