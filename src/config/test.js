@@ -2,6 +2,7 @@ const winston = require('winston');
 const knex = require('knex');
 
 module.exports = {
+  port: 1919,
   db: knex({
     client: 'sqlite3',
     connection: {
