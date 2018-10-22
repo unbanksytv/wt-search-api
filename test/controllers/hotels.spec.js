@@ -18,10 +18,10 @@ describe('controllers - hotel', function () {
     await Location.upsert('0xdummy3', 42, 10);
     await Location.upsert('0xdummy4', 42.5, 10);
     await HotelModel.create([
-      { address: '0xdummy1', partName: 'description', rawData: { } },
-      { address: '0xdummy2', partName: 'description', rawData: { } },
-      { address: '0xdummy3', partName: 'description', rawData: { } },
-      { address: '0xdummy4', partName: 'description', rawData: { } },
+      { address: '0xdummy1', partName: 'description', rawData: { name: 'dummy1' } },
+      { address: '0xdummy2', partName: 'description', rawData: { name: 'dummy2' } },
+      { address: '0xdummy3', partName: 'description', rawData: { name: 'dummy3' } },
+      { address: '0xdummy4', partName: 'description', rawData: { name: 'dummy4' } },
     ]);
   });
 
@@ -39,7 +39,12 @@ describe('controllers - hotel', function () {
           if (err) return done(err);
           try {
             assert.equal(res.body.length, 4);
-            assert.deepEqual(res.body, ['0xdummy1', '0xdummy2', '0xdummy3', '0xdummy4']);
+            assert.deepEqual(res.body, [
+              { id: '0xdummy1', name: 'dummy1' },
+              { id: '0xdummy2', name: 'dummy2' },
+              { id: '0xdummy3', name: 'dummy3' },
+              { id: '0xdummy4', name: 'dummy4' },
+            ]);
             done();
           } catch (err) {
             done(err);
@@ -56,7 +61,10 @@ describe('controllers - hotel', function () {
           if (err) return done(err);
           try {
             assert.equal(res.body.length, 2);
-            assert.deepEqual(res.body, ['0xdummy2', '0xdummy1']);
+            assert.deepEqual(res.body, [
+              { id: '0xdummy2', name: 'dummy2' },
+              { id: '0xdummy1', name: 'dummy1' },
+            ]);
             done();
           } catch (err) {
             done(err);
