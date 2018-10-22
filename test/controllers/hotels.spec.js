@@ -48,13 +48,8 @@ describe('controllers - hotel', function () {
     });
 
     it('should return a list of hotels based on filtering and sorting criteria', (done) => {
-      let filtering = [{ type: 'location', condition: { lat: 40.5, lng: 10, distance: 120 } }],
-        sorting = { type: 'location', data: { lat: 50, lng: 10 } };
-      filtering = encodeURIComponent(JSON.stringify(filtering));
-      sorting = encodeURIComponent(JSON.stringify(sorting));
-
       request(server)
-        .get(`/hotels?filter=${filtering}&sort=${sorting}`)
+        .get('/hotels?location=40.5,10:120&sortByLocation=50,10')
         .expect(200)
         .expect('content-type', /application\/json/)
         .end(async (err, res) => {
@@ -69,18 +64,9 @@ describe('controllers - hotel', function () {
         });
     });
 
-    it('should return HTTP 400 when filtering and sorting criteria cannot be parsed', (done) => {
-      request(server)
-        .get('/hotels?filter=dummy&sort=dummy')
-        .expect(400)
-        .end(done);
-    });
-
     it('should return HTTP 400 when filtering and sorting criteria do not make sense', (done) => {
-      let filtering = [{ type: 'location', condition: 'dummy' }];
-      filtering = encodeURIComponent(JSON.stringify(filtering));
       request(server)
-        .get(`/hotels?filter=${filtering}`)
+        .get('/hotels?location=dummy&sortByLocation=dummy')
         .expect(400)
         .end(done);
     });
