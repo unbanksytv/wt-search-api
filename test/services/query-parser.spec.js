@@ -47,8 +47,8 @@ describe('query-parser', function () {
 
   describe('getSort', () => {
     it('should return the parsed sorting definition when the data is correct', () => {
-      const sort = { type: 'location', data: { lat: 10, lng: 20 } },
-        query = { sortByLocation: '10,20' },
+      const sort = { type: 'distance', data: { lat: 10, lng: 20 } },
+        query = { sortByDistance: '10,20' },
         parsed = getSort(query);
       assert.deepEqual(parsed, sort);
     });
@@ -60,17 +60,17 @@ describe('query-parser', function () {
     });
 
     it('should fail when the sorting definition is wrong', () => {
-      const query = { sortByLocation: 'dummy' };
+      const query = { sortByDistance: 'dummy' };
       assert.throws(() => getSort(query), QueryParseError);
     });
 
     it('should fail when the lat / long are nonsensical', () => {
-      const query = { sortByLocation: '1000,20' };
+      const query = { sortByDistance: '1000,20' };
       assert.throws(() => getSort(query), QueryParseError);
     });
 
     it('should fail when multiple sorts are presented', () => {
-      const query = { sortByLocation: ['10,20', '20,30'] };
+      const query = { sortByDistance: ['10,20', '20,30'] };
       assert.throws(() => getSort(query), QueryParseError);
     });
   });

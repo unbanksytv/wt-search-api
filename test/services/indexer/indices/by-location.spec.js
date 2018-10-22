@@ -169,7 +169,7 @@ describe('indices.by-location', () => {
   describe('getSorting', () => {
     it('should return a sorting representation based on the query', async () => {
       const query = {
-          sorting: { type: 'location', data: { lat: 10, lng: 10 } },
+          sorting: { type: 'distance', data: { lat: 10, lng: 10 } },
         },
         sorting = byLocation.getSorting(query);
       assert.property(sorting, 'table');

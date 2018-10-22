@@ -49,7 +49,7 @@ describe('controllers - hotel', function () {
 
     it('should return a list of hotels based on filtering and sorting criteria', (done) => {
       request(server)
-        .get('/hotels?location=40.5,10:120&sortByLocation=50,10')
+        .get('/hotels?location=40.5,10:120&sortByDistance=50,10')
         .expect(200)
         .expect('content-type', /application\/json/)
         .end(async (err, res) => {
@@ -66,7 +66,7 @@ describe('controllers - hotel', function () {
 
     it('should return HTTP 400 when filtering and sorting criteria do not make sense', (done) => {
       request(server)
-        .get('/hotels?location=dummy&sortByLocation=dummy')
+        .get('/hotels?location=dummy&sortByDistance=dummy')
         .expect(400)
         .end(done);
     });

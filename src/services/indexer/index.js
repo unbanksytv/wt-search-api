@@ -96,7 +96,7 @@ class Indexer {
   *     },
   *   ],
   *   sorting: {
-  *     type: 'location',
+  *     type: 'distance',
   *     data: { lat: 10, lng: 10 },
   *   },
   * }

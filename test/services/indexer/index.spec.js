@@ -64,7 +64,7 @@ describe('services.indexer.index', () => {
             },
           ],
           sorting: {
-            type: 'location',
+            type: 'distance',
             data: { lat: 20, lng: 20 },
           },
         },

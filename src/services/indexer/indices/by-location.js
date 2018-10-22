@@ -126,7 +126,7 @@ function getFiltering (query) {
  *
  */
 function getSorting (query) {
-  if (!query.sorting || query.sorting.type !== 'location') {
+  if (!query.sorting || query.sorting.type !== 'distance') {
     return undefined;
   }
   return _getSorting(query.sorting.data.lat, query.sorting.data.lng);

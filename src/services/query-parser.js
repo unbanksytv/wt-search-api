@@ -64,18 +64,18 @@ function getFilters (query) {
  * @throw QueryParseError
  *
  */
-function _getLocationSort (sort) {
+function _getDistanceSort (sort) {
   if (sort instanceof Array) {
-    throw new QueryParseError('Only one location sort can be specified at once.');
+    throw new QueryParseError('Only one distance-based sort can be specified at once.');
   }
   let [lat, lng] = sort.split(',').map((x) => Number(x));
   if ((isNaN(lat) || isNaN(lng)) ||
       (lat < -90 || lat > 90) ||
       (lng < -180 || lng > 180)) {
-    throw new QueryParseError(`Invalid location sort: ${sort}.`);
+    throw new QueryParseError(`Invalid sorting criteria: ${sort}.`);
   }
   return {
-    type: 'location',
+    type: 'distance',
     data: { lat: lat, lng: lng },
   };
 }
@@ -113,7 +113,7 @@ const FILTERS = {
 
 const SORTS = {
   // { <query_param> : <sort_fn> }
-  sortByLocation: _getLocationSort,
+  sortByDistance: _getDistanceSort,
 };
 
 module.exports = {
