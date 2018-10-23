@@ -69,6 +69,12 @@ paths:
                     description: List of resolved hotels.
                     items:
                       $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/3e9f47badeb20d4cf1082e787952ccc4da714e16/docs/swagger.yaml#/components/schemas/HotelListItem
+                  next:
+                    description: >-
+                      Uri to next page of records. When there's no next page,
+                      this is not set.
+                    $ref: >-
+                      https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/UriType
         '400':
           $ref: '#/components/responses/BadRequestError'
 components:

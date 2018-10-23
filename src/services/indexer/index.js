@@ -34,12 +34,14 @@ class Indexer {
   * for sorting (e.g. location when sorting by distance), it is
   * omitted from the results altogether.
   *
+  * @param {Number} limit
+  * @param {String} startWith (optional)
   * @param {Array} filters (optional)
   * @param {Object} sorting (optional)
   * @return {Promise<Array>}
   *
   */
-  async _getHotelAddresses (filters, sorting) {
+  async _getHotelAddresses (limit, startWith, filters, sorting) {
     if (!filters && !sorting) {
       throw new Error('At least one of `filters`, `sorting` must be provided.');
     }
@@ -76,7 +78,28 @@ class Indexer {
 
     // 4. Apply sorting.
     if (sorting) {
-      query.select(sorting.select).orderBy(sorting.columnName);
+      query = query.select(sorting.select).orderBy(sorting.columnName);
+    }
+
+    // 5. Apply pagination criteria.
+    query = query.orderBy(`${firstTable}.hotel_address`).limit(limit);
+    if (startWith) {
+      if (sorting) { // Retrieve the sorting score of the first item.
+        let startWithScore = (await db(sorting.table)
+          .select(sorting.select)
+          .where(`${sorting.table}.hotel_address`, startWith))[0];
+        startWithScore = startWithScore && startWithScore[sorting.columnName];
+        if (startWithScore) {
+          query = query
+            .where(`${sorting.columnName}`, '>=', startWithScore)
+            .orWhere(function () {
+              this.where(`${sorting.columnName}`, '=', startWithScore)
+                .andWhere(`${firstTable}.hotel_address`, '>=', startWith);
+            });
+        } // If there's no such score, ignore the startWith parameter.
+      } else {
+        query = query.where(`${firstTable}.hotel_address`, '>=', startWith);
+      }
     }
 
     const data = await query.select(`${firstTable}.hotel_address`);
@@ -106,10 +129,12 @@ class Indexer {
   * distance from the same location.)
   *
   * @param {Object} query
+  * @param {Number} limit
+  * @param {String} startWith (optional)
   * @return {Promise<Array>}
   *
   */
-  async lookup (query) {
+  async lookup (query, limit, startWith) {
     let filtering = INDEXERS
       .map((indexer) => indexer.getFiltering(query))
       .filter(Boolean)
@@ -121,7 +146,7 @@ class Indexer {
       .filter(Boolean)
       .reduce((prev, curr) => prev || curr, undefined);
 
-    return this._getHotelAddresses(filtering, sorting);
+    return this._getHotelAddresses(limit, startWith, filtering, sorting);
   }
 }
 

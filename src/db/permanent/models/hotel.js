@@ -72,11 +72,22 @@ const getLatestHotelData = async (hotelAddress, partNames) => {
  * NOTE: This method is probably just temporary, therefore
  * it's not directly tested.
  *
+ * @param {Number} limit
+ * @param {String} startWith (optional)
  * @return {Promise<Array>}
  */
-const getAddresses = async () => {
-  const result = await db.from(TABLE).distinct('address').select();
-  return result.map((item) => item.address);
+const getAddresses = async (limit, startWith) => {
+  let query = db
+    .from(TABLE)
+    .distinct('address')
+    .orderBy('address')
+    .limit(limit);
+
+  if (startWith) {
+    query = query.where('address', '>=', startWith);
+  }
+
+  return (await query.select()).map((item) => item.address);
 };
 
 module.exports = {

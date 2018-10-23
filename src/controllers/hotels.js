@@ -1,3 +1,4 @@
+const { baseUrl, defaultPageSize, maxPageSize } = require('../config');
 const { HttpBadRequestError } = require('../errors');
 const queryParser = require('../services/query-parser');
 const Indexer = require('../services/indexer');
@@ -31,17 +32,28 @@ async function _augmentWithData (hotelAddresses, queryParams) {
  */
 module.exports.getList = async (req, res, next) => {
   try {
+    const limit = Math.min(maxPageSize, req.query.limit || defaultPageSize),
+      startWith = req.query.startWith;
+    if (isNaN(limit)) {
+      throw new HttpBadRequestError('badRequest', `Invalid limit: ${req.query.limit}`);
+    }
     const query = {
       filters: queryParser.getFilters(req.query),
       sorting: queryParser.getSort(req.query),
     };
     let hotelAddresses;
     if (query.filters || query.sorting) {
-      hotelAddresses = await indexer.lookup(query);
+      hotelAddresses = await indexer.lookup(query, limit + 1, startWith);
     } else {
-      hotelAddresses = await HotelModel.getAddresses();
+      hotelAddresses = await HotelModel.getAddresses(limit + 1, startWith);
     }
-    res.json(await _augmentWithData(hotelAddresses, req.query));
+    const hotels = await _augmentWithData(hotelAddresses.slice(0, limit), req.query),
+      result = { items: hotels };
+
+    if (hotelAddresses[limit]) {
+      result.next = `${baseUrl}${req.path}?limit=${limit}&startWith=${hotelAddresses[limit]}`;
+    }
+    res.json(result);
   } catch (err) {
     if (err instanceof queryParser.QueryParseError) {
       return next(new HttpBadRequestError('badRequest', err.message));

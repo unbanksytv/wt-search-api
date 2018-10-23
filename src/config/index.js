@@ -14,4 +14,7 @@ module.exports = Object.assign({
       }),
     ],
   }),
+  // API response pagination:
+  defaultPageSize: 30,
+  maxPageSize: 300,
 }, require(`./${env}`));

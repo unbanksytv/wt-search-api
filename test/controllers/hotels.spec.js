@@ -38,13 +38,36 @@ describe('controllers - hotel', function () {
         .end(async (err, res) => {
           if (err) return done(err);
           try {
-            assert.equal(res.body.length, 4);
-            assert.deepEqual(res.body, [
-              { id: '0xdummy1', name: 'dummy1' },
-              { id: '0xdummy2', name: 'dummy2' },
-              { id: '0xdummy3', name: 'dummy3' },
-              { id: '0xdummy4', name: 'dummy4' },
-            ]);
+            assert.deepEqual(res.body, {
+              items: [
+                { id: '0xdummy1', name: 'dummy1' },
+                { id: '0xdummy2', name: 'dummy2' },
+                { id: '0xdummy3', name: 'dummy3' },
+                { id: '0xdummy4', name: 'dummy4' },
+              ],
+            });
+            done();
+          } catch (err) {
+            done(err);
+          }
+        });
+    });
+
+    it('should support pagination', (done) => {
+      request(server)
+        .get('/hotels?limit=2&startWith=0xdummy2')
+        .expect(200)
+        .expect('content-type', /application\/json/)
+        .end(async (err, res) => {
+          if (err) return done(err);
+          try {
+            assert.deepEqual(res.body, {
+              items: [
+                { id: '0xdummy2', name: 'dummy2' },
+                { id: '0xdummy3', name: 'dummy3' },
+              ],
+              next: 'http://localhost:1918/hotels?limit=2&startWith=0xdummy4',
+            });
             done();
           } catch (err) {
             done(err);
