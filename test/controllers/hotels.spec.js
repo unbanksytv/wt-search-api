@@ -101,5 +101,12 @@ describe('controllers - hotel', function () {
         .expect(400)
         .end(done);
     });
+
+    it('should return HTTP 400 when pagination parameters do not make sense', (done) => {
+      request(server)
+        .get('/hotels?limit=dummy')
+        .expect(400)
+        .end(done);
+    });
   });
 });

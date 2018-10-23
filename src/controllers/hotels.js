@@ -34,7 +34,7 @@ module.exports.getList = async (req, res, next) => {
   try {
     const limit = Math.min(maxPageSize, req.query.limit || defaultPageSize),
       startWith = req.query.startWith;
-    if (isNaN(limit)) {
+    if (isNaN(limit) || limit < 1) {
       throw new HttpBadRequestError('badRequest', `Invalid limit: ${req.query.limit}`);
     }
     const query = {
