@@ -72,11 +72,13 @@ describe('services.crawler.index', () => {
       assert.equal(result.length, 3);
     });
 
-    it('should end gracefully when hotel list cannot be retrieved', async () => {
-      crawler.getFetcher().fetchHotelList = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
+    it('should not panic when individual hotels cannot be synced', async () => {
+      syncHotelStub = sinon.stub().rejects(new Error('Cannot sync hotel'));
+      crawler.syncHotel = syncHotelStub;
       const result = await crawler.syncAllHotels();
-      assert.equal(result.length, 0);
-      assert.equal(crawler.getFetcher().fetchHotelList.callCount, 1);
+      assert.equal(fetchHotelListStub.callCount, 1);
+      assert.equal(syncHotelStub.callCount, 3);
+      assert.equal(result.length, 3);
     });
   });
 
@@ -166,18 +168,6 @@ describe('services.crawler.index', () => {
       assert.equal(result[1].part_name, 'ratePlans');
       assert.equal(result[2].address, '0xdummy');
       assert.equal(result[2].part_name, 'availability');
-      createSpy.restore();
-    });
-
-    it('should not panic on fetch error of dataUris', async () => {
-      const createSpy = sinon.spy(HotelModel, 'create');
-      crawler.getFetcher().fetchDataUris = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
-      await crawler.syncHotel('0xdummy');
-      assert.equal(crawler.getFetcher().fetchDataUris.callCount, 1);
-      assert.equal(fetchRatePlansStub.callCount, 0);
-      assert.equal(fetchAvailabilityStub.callCount, 0);
-      assert.equal(fetchDataUrisStub.callCount, 0);
-      assert.equal(createSpy.callCount, 0);
       createSpy.restore();
     });
 

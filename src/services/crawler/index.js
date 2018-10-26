@@ -40,7 +40,9 @@ class Crawler {
         onEveryPage: (hotels) => {
           for (let hotelAddress of hotels.addresses) {
             syncPromises.push(
-              this.syncHotel(hotelAddress)
+              // For the sake of robustness, ignore individual hotel errors.
+              // (The errors are logged within syncHotel already.)
+              this.syncHotel(hotelAddress).catch(() => undefined)
             );
           }
         },
@@ -48,7 +50,7 @@ class Crawler {
       return Promise.all(syncPromises);
     } catch (e) {
       this.logError(e, `Fetching hotel list error: ${e.message}`);
-      return [];
+      throw e;
     }
   }
 
@@ -96,7 +98,8 @@ class Crawler {
         this.config.logger.debug(`No data for ${hotelAddress} available`);
       }
     } catch (e) {
-      this.logError(e, `Fetching hotel part error: ${hotelAddress}:dataUris - ${e.message}`);
+      this.logError(e, `Fetching hotel error: ${hotelAddress} - ${e.message}`);
+      throw e;
     };
   }
 
