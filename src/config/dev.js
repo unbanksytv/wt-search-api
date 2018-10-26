@@ -24,4 +24,8 @@ module.exports = {
     limit: 10,
     triggerIndexing: true,
   },
+  sync: {
+    interval: null,
+    initial: false,
+  },
 };

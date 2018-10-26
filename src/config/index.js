@@ -17,4 +17,9 @@ module.exports = Object.assign({
   // API response pagination:
   defaultPageSize: 30,
   maxPageSize: 300,
+  sync: {
+    // Perform complete resync once per hour. Set to `null` if no periodic syncing is desired.
+    interval: 1000 * 60 * 60,
+    initial: true, // Perform the initial sync immediately after server start?
+  },
 }, require(`./${env}`));
