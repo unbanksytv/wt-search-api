@@ -5,4 +5,4 @@
 const server = require('../src/index'); // As a side effect, this will set up all the message listeners.
 
 const queue = require('../src/services/queue').get();
-queue.enqueue({ type: 'initialSync' });
+queue.enqueue({ type: 'syncAll' });

@@ -13,7 +13,7 @@ const syncHotel = (payload) => {
   return crawler.syncHotel(payload.hotelAddress);
 };
 
-const initialSync = () => {
+const syncAll = () => {
   return crawler.syncAllHotels();
 };
 
@@ -28,13 +28,13 @@ const registerProcessors = () => {
   worker.register('syncHotelPart', (data) => {
     return syncHotelPart(data);
   });
-  worker.register('initialSync', (data) => {
-    return initialSync();
+  worker.register('syncAll', (data) => {
+    return syncAll();
   });
 };
 
 module.exports = {
-  initialSync,
+  syncAll,
   syncHotel,
   syncHotelPart,
   registerProcessors,
