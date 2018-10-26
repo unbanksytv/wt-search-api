@@ -78,7 +78,7 @@ class Crawler {
         })());
       }
       const hotelData = (await Promise.all(hotelPartPromises)).map((part) => {
-        if (part) {
+        if (part && part.rawData) {
           return {
             address: hotelAddress,
             partName: part.partName,

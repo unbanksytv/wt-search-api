@@ -181,6 +181,14 @@ describe('services.crawler.index', () => {
       createSpy.restore();
     });
 
+    it('should not panic when empty response is returned for a particular resource', async () => {
+      const createSpy = sinon.spy(HotelModel, 'create');
+      crawler.getFetcher().fetchAvailability = sinon.stub().resolves();
+      await crawler.syncHotel('0xdummy');
+      assert.equal(createSpy.callCount, 2);
+      createSpy.restore();
+    });
+
     it('should throw when hotelAddress is missing', async () => {
       try {
         await crawler.syncHotel();
