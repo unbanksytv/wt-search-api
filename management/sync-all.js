@@ -1,9 +1,14 @@
 const { db } = require('../src/config');
 const { syncAll } = require('../src/services/crawler/queue-adapter');
-const server = require('../src/index'); // As a side effect, this will set up all the message listeners.
+
+const crawlerAdapter = require('../src/services/crawler/queue-adapter');
+const indexerAdapter = require('../src/services/indexer/queue-adapter');
+
+// Set up all message listeners.
+crawlerAdapter.registerProcessors();
+indexerAdapter.registerProcessors();
 
 syncAll().finally(() => {
-  server.close();
   setTimeout(() => { // Leave some time to finish indexing before closing the database connection.
     db.destroy();
   }, 500);
