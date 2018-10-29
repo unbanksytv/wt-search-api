@@ -4,5 +4,7 @@ const server = require('../src/index'); // As a side effect, this will set up al
 
 syncAll().finally(() => {
   server.close();
-  db.destroy();
+  setTimeout(() => { // Leave some time to finish indexing before closing the database connection.
+    db.destroy();
+  }, 500);
 });
