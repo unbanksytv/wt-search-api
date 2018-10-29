@@ -1,4 +1,5 @@
 const Hotel = require('./models/hotel');
+const Subscription = require('./models/subscription');
 
 /**
  * Create all necessary tables.
@@ -7,6 +8,7 @@ const Hotel = require('./models/hotel');
  */
 const setupDB = async () => {
   await Hotel.createTable();
+  await Subscription.createTable();
 };
 
 /**
@@ -16,6 +18,7 @@ const setupDB = async () => {
  */
 const resetDB = async () => {
   await Hotel.dropTable();
+  await Subscription.dropTable();
   await setupDB();
 };
 
