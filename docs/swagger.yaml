@@ -77,6 +77,20 @@ paths:
                       https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/UriType
         '400':
           $ref: '#/components/responses/BadRequestError'
+  /notifications:
+    post:
+      summary: Publish an update notification. Facilitates the consumer webhook endpoint for wt-update-api.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'https://raw.githubusercontent.com/windingtree/wt-update-api/baa3df84b495895203f116710d5f0291c5370693/docs/swagger.yaml#/components/schemas/Notification'
+      responses:
+        '200':
+          description: Notification has been accepted.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
 components:
   responses:
     BadRequestError:

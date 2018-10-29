@@ -25,6 +25,12 @@ const get = () => {
   return _Q;
 };
 
+const set = (queue) => {
+  // Allow injection from outside to enable mocking.
+  _Q = queue;
+};
+
 module.exports = {
   get: get,
+  set: set,
 };

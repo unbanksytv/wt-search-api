@@ -11,6 +11,7 @@ const config = require('./config');
 const { version } = require('../package.json');
 const { HttpError, HttpInternalError, Http404Error, HttpBadRequestError } = require('./errors');
 const hotels = require('./controllers/hotels');
+const notifications = require('./controllers/notifications');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.get('/', (req, res) => {
 
 // Hotels
 app.get('/hotels', hotels.getList);
+app.post('/notifications', notifications.accept);
 
 // 404 handler
 app.use('*', (req, res, next) => {

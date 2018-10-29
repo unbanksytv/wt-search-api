@@ -7,7 +7,7 @@ const { resetDB } = require('../../src/db');
 const Location = require('../../src/db/indexed/models/location');
 const HotelModel = require('../../src/db/permanent/models/hotel');
 
-describe('controllers - hotel', function () {
+describe('controllers - hotels', function () {
   let server;
 
   before(async () => {
