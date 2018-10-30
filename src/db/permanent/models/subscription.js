@@ -30,6 +30,25 @@ const create = (subscriptionData) => {
 };
 
 /**
+ * Update an existing subscription record.
+ *
+ * @param {Object} subscriptionData
+ * @return {Promise<Object>}
+ */
+const update = (hotelAddress, subscriptionData) => {
+  const update = {
+    'notifications_uri': subscriptionData.notificationsUri,
+    'remote_id': subscriptionData.remoteId,
+  };
+  for (let key in update) {
+    if (update[key] === undefined) {
+      delete update[key];
+    }
+  }
+  return db(TABLE).update(update).where('hotel_address', hotelAddress);
+};
+
+/**
  * Retrieve a subscription record by hotel address.
  *
  * @param {String} hotelAddress
@@ -51,6 +70,7 @@ const get = async (hotelAddress) => {
 module.exports = {
   create,
   get,
+  update,
   createTable,
   dropTable,
   TABLE,

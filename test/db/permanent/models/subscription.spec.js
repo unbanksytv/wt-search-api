@@ -71,4 +71,25 @@ describe('models.subscription', () => {
       assert.equal(result, undefined);
     });
   });
+
+  describe('update', async () => {
+    beforeEach(async () => {
+      await resetDB();
+      await Subscription.create({
+        hotelAddress: '0xdummy',
+        remoteId: 'dummy_remote_id',
+        notificationsUri: 'dummy_uri',
+      });
+    });
+
+    it('should update the existing subscription', async () => {
+      await Subscription.update('0xdummy', { notificationsUri: 'modified' });
+      const result = await Subscription.get('0xdummy');
+      assert.deepEqual(result, {
+        hotelAddress: '0xdummy',
+        remoteId: 'dummy_remote_id',
+        notificationsUri: 'modified',
+      });
+    });
+  });
 });
