@@ -7,6 +7,9 @@ const crawler = new Crawler(Object.assign({}, {
   // If set to true, the indexer will be triggered for each
   // saved hotel.
   triggerIndexing: false,
+  // If set to true, the crawler will subscribe for
+  // hotel notifications when applicable.
+  subscribeForNotifications: false,
 }, crawlerOpts));
 
 const syncHotel = (payload) => {

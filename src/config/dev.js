@@ -23,6 +23,7 @@ module.exports = {
     timeout: 30000,
     limit: 10,
     triggerIndexing: true,
+    subscribeForNotifications: true,
   },
   sync: {
     interval: null,

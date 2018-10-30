@@ -1,6 +1,7 @@
 const Queue = require('../queue');
 const { Fetcher, FetcherRemoteError } = require('./fetcher');
 const HotelModel = require('../../db/permanent/models/hotel');
+const { subscribeIfNeeded } = require('../../services/subscription');
 
 class CrawlerError extends Error {}
 class CrawlerInitializationError extends CrawlerError {}
@@ -79,15 +80,21 @@ class Crawler {
           }
         })());
       }
-      const hotelData = (await Promise.all(hotelPartPromises)).map((part) => {
-        if (part && part.rawData) {
-          return {
-            address: hotelAddress,
-            partName: part.partName,
-            rawData: part.rawData,
-          };
-        }
-      }).filter((p) => !!p);
+      const hotelParts = (await Promise.all(hotelPartPromises)),
+        hotelData = hotelParts.map((part) => {
+          if (part && part.rawData) {
+            return {
+              address: hotelAddress,
+              partName: part.partName,
+              rawData: part.rawData,
+            };
+          }
+        }).filter((p) => !!p),
+        description = hotelParts.filter((part) =>
+          part && part.rawData && part.partName === 'description'
+        )[0],
+        notificationsUri = description && description.rawData.notificationsUri;
+
       if (hotelData.length !== 0) {
         this.config.logger.debug(`Saving ${hotelAddress} into database`);
         await HotelModel.create(hotelData);
@@ -96,6 +103,10 @@ class Crawler {
         }
       } else {
         this.config.logger.debug(`No data for ${hotelAddress} available`);
+      }
+      if (notificationsUri && this.config.subscribeForNotifications) {
+        this.config.logger.debug(`Subscribing for update notifications for ${hotelAddress} at ${notificationsUri}`);
+        await subscribeIfNeeded(notificationsUri, hotelAddress);
       }
     } catch (e) {
       this.logError(e, `Fetching hotel error: ${hotelAddress} - ${e.message}`);
