@@ -1,7 +1,7 @@
 const Queue = require('../queue');
 const { Fetcher, FetcherRemoteError } = require('./fetcher');
 const HotelModel = require('../../db/permanent/models/hotel');
-const { subscribeIfNeeded } = require('../../services/subscription');
+const { subscribeIfNeeded, RemoteError } = require('../../services/subscription');
 
 class CrawlerError extends Error {}
 class CrawlerInitializationError extends CrawlerError {}
@@ -126,7 +126,15 @@ class Crawler {
       }
       if (notificationsUri && this.config.subscribeForNotifications) {
         this.config.logger.debug(`Subscribing for update notifications for ${hotelAddress} at ${notificationsUri}`);
-        await subscribeIfNeeded(notificationsUri, hotelAddress);
+        try {
+          await subscribeIfNeeded(notificationsUri, hotelAddress);
+        } catch (err) {
+          if (err instanceof RemoteError) {
+            this.config.logger.info(`Could not subscribe for notifications: ${err.message}`);
+          } else {
+            throw err;
+          }
+        }
       }
     } catch (e) {
       this.logError(e, `Fetching hotel error: ${hotelAddress} - ${e.message}`);
