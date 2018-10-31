@@ -1,5 +1,7 @@
 const request = require('request-promise-native');
 
+const { readApiUrl } = require('../../config');
+
 const DESCRIPTION_FIELDS = [
   'id',
   'managerAddress',
@@ -22,13 +24,9 @@ const DESCRIPTION_FIELDS = [
 
 class FetcherError extends Error {}
 class FetcherRemoteError extends Error {}
-class FetcherInitializationError extends FetcherError {}
 
 class Fetcher {
   constructor (options) {
-    if (!options || !options.readApiUrl) {
-      throw new FetcherInitializationError('readApiUrl is required in options!');
-    }
     this.config = Object.assign({}, {
       timeout: 1000,
       limit: 10,
@@ -66,7 +64,7 @@ class Fetcher {
   }
 
   _fetchHotelAddresses (options) {
-    const expectedUrl = new RegExp(`^${this.config.readApiUrl}/hotels`, 'i');
+    const expectedUrl = new RegExp(`^${readApiUrl}/hotels`, 'i');
     if (options.url && !options.url.match(expectedUrl)) {
       throw new FetcherError(`${options.url} does not look like hotels list URI`);
     }
@@ -109,24 +107,24 @@ class Fetcher {
   fetchHotelList (options = {}) {
     return this._fetchHotelAddresses(Object.assign({}, {
       counter: 1,
-      url: `${this.config.readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
+      url: `${readApiUrl}/hotels?limit=${this.config.limit}&fields=id`,
     }, options));
   };
 
   fetchDataUris (hotelAddress) {
-    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/dataUris`);
+    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}/dataUris`);
   };
 
   fetchDescription (hotelAddress) {
-    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}?fields=${DESCRIPTION_FIELDS.join(',')}`);
+    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}?fields=${DESCRIPTION_FIELDS.join(',')}`);
   };
 
   fetchRatePlans (hotelAddress) {
-    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/ratePlans`);
+    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}/ratePlans`);
   };
 
   fetchAvailability (hotelAddress) {
-    return this._fetchHotelResource(hotelAddress, `${this.config.readApiUrl}/hotels/${hotelAddress}/availability`);
+    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}/availability`);
   };
 }
 
@@ -135,5 +133,4 @@ module.exports = {
   Fetcher,
   FetcherError,
   FetcherRemoteError,
-  FetcherInitializationError,
 };

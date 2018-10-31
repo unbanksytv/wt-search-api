@@ -3,6 +3,7 @@ const knex = require('knex');
 
 module.exports = {
   port: 1919,
+  readApiUrl: 'http://test-read-api.wt.com',
   db: knex({
     client: 'sqlite3',
     connection: {

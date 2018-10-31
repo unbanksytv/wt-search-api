@@ -1,41 +1,28 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
 const nock = require('nock');
-const { Fetcher, FetcherInitializationError, DESCRIPTION_FIELDS } = require('../../../src/services/crawler/fetcher');
+const { readApiUrl } = require('../../../src/config');
+const { Fetcher, DESCRIPTION_FIELDS } = require('../../../src/services/crawler/fetcher');
 const hotelData = require('../../utils/test-data');
 
 describe('services.crawler.fetcher', () => {
   describe('initalization', () => {
-    it('should throw when options are not passed', () => {
-      assert.throws(() => new Fetcher(), /is required in options/i);
-      assert.throws(() => new Fetcher(), FetcherInitializationError);
-    });
-
-    it('should throw when readApiUrl is not passed in options', () => {
-      assert.throws(() => new Fetcher({}), /is required in options/i);
-      assert.throws(() => new Fetcher({}), FetcherInitializationError);
-    });
-
     it('should overwrite default options', () => {
       const fetcher = new Fetcher({
-        readApiUrl: 'https://example.com',
         limit: 150,
         timeout: 3500,
       });
       assert.equal(fetcher.config.limit, 150);
       assert.equal(fetcher.config.timeout, 3500);
-      assert.equal(fetcher.config.readApiUrl, 'https://example.com');
     });
   });
 
   describe('fetchHotelList', () => {
-    const readApiUrl = 'https://read-api.wt.com',
-      limit = 5;
+    const limit = 5;
     let fetcher;
 
     beforeEach(() => {
       fetcher = new Fetcher({
-        readApiUrl,
         limit,
       });
     });
@@ -298,14 +285,11 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('fetchDataUris', () => {
-    const readApiUrl = 'https://read-api.wt.com',
-      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    const hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
-      fetcher = new Fetcher({
-        readApiUrl,
-      });
+      fetcher = new Fetcher();
     });
 
     it('should return dataUris object', async () => {
@@ -349,14 +333,11 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('fetchDesciption', () => {
-    const readApiUrl = 'https://read-api.wt.com',
-      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    const hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
-      fetcher = new Fetcher({
-        readApiUrl,
-      });
+      fetcher = new Fetcher();
     });
 
     it('should return description object', async () => {
@@ -390,14 +371,11 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('fetchRatePlans', () => {
-    const readApiUrl = 'https://read-api.wt.com',
-      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    const hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
-      fetcher = new Fetcher({
-        readApiUrl,
-      });
+      fetcher = new Fetcher();
     });
 
     it('should return description object', async () => {
@@ -431,14 +409,11 @@ describe('services.crawler.fetcher', () => {
   });
 
   describe('fetchAvailability', () => {
-    const readApiUrl = 'https://read-api.wt.com',
-      hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
+    const hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
     beforeEach(() => {
-      fetcher = new Fetcher({
-        readApiUrl,
-      });
+      fetcher = new Fetcher();
     });
 
     it('should return description object', async () => {
