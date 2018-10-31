@@ -1,7 +1,8 @@
 const request = require('request-promise-native');
 
 const Subscription = require('../db/permanent/models/subscription');
-const { baseUrl, wtIndexAddress } = require('../config');
+const { baseUrl } = require('../config');
+const wtIndexGetter = require('./wt-index-getter');
 
 class RemoteError extends Error {};
 
@@ -16,6 +17,7 @@ class RemoteError extends Error {};
 async function _sendSubscriptionRequest (notificationsUri, hotelAddress, requestLib) {
   requestLib = requestLib || request;
   let response;
+  const wtIndexAddress = await wtIndexGetter.get(requestLib);
   try {
     response = await requestLib({
       method: 'POST',

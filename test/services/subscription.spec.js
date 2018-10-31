@@ -1,19 +1,26 @@
 const { assert } = require('chai');
 const sinon = require('sinon');
 
-const { baseUrl, wtIndexAddress } = require('../../src/config');
+const { baseUrl } = require('../../src/config');
 const { subscribeIfNeeded, RemoteError } = require('../../src/services/subscription');
 const Subscription = require('../../src/db/permanent/models/subscription');
 const { resetDB } = require('../../src/db/permanent');
+const wtIndexGetter = require('../../src/services/wt-index-getter');
 
 const requestMock = sinon.stub().callsFake((opts) => {
-  if (opts.body.resourceAddress === 'invalidAddress') {
-    return Promise.reject(new Error('Invalid hotel address.'));
+  if (opts.method === 'GET') { // wt index address getter
+    return Promise.resolve({
+      wtIndexAddress: '0xdummyIndex',
+    });
+  } else { // subscription creation
+    if (opts.body.resourceAddress === 'invalidAddress') {
+      return Promise.reject(new Error('Invalid hotel address.'));
+    }
+    return Promise.resolve({
+      statusCode: 201,
+      body: { subscriptionId: 'dummyRemoteId' },
+    });
   }
-  return Promise.resolve({
-    statusCode: 201,
-    body: { subscriptionId: 'dummyRemoteId' },
-  });
 });
 
 describe('subscription', function () {
@@ -35,10 +42,11 @@ describe('subscription', function () {
 
     it('should create a new subscription if necessary', async () => {
       await subscribeIfNeeded('http://dummy.uri', '0xdummy', requestMock);
-      assert.equal(requestMock.callCount, 1);
-      assert.equal(requestMock.args[0][0].uri, 'http://dummy.uri/subscriptions');
-      assert.deepEqual(requestMock.args[0][0].body, {
-        wtIndex: wtIndexAddress,
+      wtIndexGetter.reset();
+      assert.equal(requestMock.callCount, 2); // One call for wt index, another for subscription.
+      assert.equal(requestMock.args[1][0].uri, 'http://dummy.uri/subscriptions');
+      assert.deepEqual(requestMock.args[1][0].body, {
+        wtIndex: '0xdummyIndex',
         resourceType: 'hotel',
         resourceAddress: '0xdummy',
         url: `${baseUrl}/notifications`,
@@ -58,8 +66,9 @@ describe('subscription', function () {
         remoteId: 'xxx',
       });
       await subscribeIfNeeded('http://dummy2.uri', '0xdummy', requestMock);
-      assert.equal(requestMock.callCount, 1);
-      assert.equal(requestMock.args[0][0].uri, 'http://dummy2.uri/subscriptions');
+      wtIndexGetter.reset();
+      assert.equal(requestMock.callCount, 2); // One call for wt index, another for subscription.
+      assert.equal(requestMock.args[1][0].uri, 'http://dummy2.uri/subscriptions');
       const sub = await Subscription.get('0xdummy');
       assert.deepEqual(sub, {
         notificationsUri: 'http://dummy2.uri',
