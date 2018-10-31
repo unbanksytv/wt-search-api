@@ -31,6 +31,26 @@ class Crawler {
     return this._fetcher;
   }
 
+  _fetchHotelPart (hotelAddress, partName) {
+    const fetcher = this.getFetcher(),
+      methodName = `fetch${partName.charAt(0).toUpperCase() + partName.slice(1)}`;
+    this.config.logger.debug(`Fetching ${partName} for ${hotelAddress}`);
+    return fetcher[methodName](hotelAddress);
+  }
+
+  async _syncHotelPart (hotelAddress, partName) {
+    const rawData = await this._fetchHotelPart(hotelAddress, partName);
+    this.config.logger.debug(`Saving ${hotelAddress} into database`);
+    return {
+      rawData: rawData,
+      db: await HotelModel.create({
+        address: hotelAddress,
+        partName: partName,
+        rawData: rawData,
+      }),
+    };
+  }
+
   async syncAllHotels () {
     // TODO deal with errored ids - although they shouldn't
     // occur here, because it's contacting only on-chain data
@@ -61,7 +81,7 @@ class Crawler {
     }
     this.config.logger.debug(`Fetching ${hotelAddress} /dataUris`);
     try {
-      const indexData = await this.syncHotelPart(hotelAddress, 'dataUris');
+      const indexData = await this._syncHotelPart(hotelAddress, 'dataUris');
       const dataUris = indexData.rawData;
       const parts = HotelModel.PART_NAMES.filter((p) => {
         return typeof dataUris[`${p}Uri`] === 'string';
@@ -111,32 +131,6 @@ class Crawler {
     } catch (e) {
       this.logError(e, `Fetching hotel error: ${hotelAddress} - ${e.message}`);
       throw e;
-    };
-  }
-
-  _fetchHotelPart (hotelAddress, partName) {
-    const fetcher = this.getFetcher(),
-      methodName = `fetch${partName.charAt(0).toUpperCase() + partName.slice(1)}`;
-    this.config.logger.debug(`Fetching ${partName} for ${hotelAddress}`);
-    return fetcher[methodName](hotelAddress);
-  }
-
-  async syncHotelPart (hotelAddress, partName) {
-    if (!hotelAddress) {
-      throw new CrawlerError('hotelAddress is required to syncHotelPart.');
-    }
-    if (!partName) {
-      throw new CrawlerError('partName is required to syncHotelPart.');
-    }
-    const rawData = await this._fetchHotelPart(hotelAddress, partName);
-    this.config.logger.debug(`Saving ${hotelAddress} into database`);
-    return {
-      rawData: rawData,
-      db: await HotelModel.create({
-        address: hotelAddress,
-        partName: partName,
-        rawData: rawData,
-      }),
     };
   }
 }

@@ -189,7 +189,7 @@ describe('services.crawler.index', () => {
     });
   });
 
-  describe('syncHotelPart', () => {
+  describe('_syncHotelPart', () => {
     let crawler,
       fetchDescriptionStub, fetchRatePlansStub;
 
@@ -208,23 +208,23 @@ describe('services.crawler.index', () => {
     });
 
     it('should fetch appropriate data', async () => {
-      await crawler.syncHotelPart('0xdummy', 'description');
+      await crawler._syncHotelPart('0xdummy', 'description');
       assert.equal(fetchDescriptionStub.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 0);
-      await crawler.syncHotelPart('0xdummy', 'ratePlans');
+      await crawler._syncHotelPart('0xdummy', 'ratePlans');
       assert.equal(fetchDescriptionStub.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 1);
     });
 
     it('should return downloaded data', async () => {
-      const result = await crawler.syncHotelPart('0xdummy', 'description');
+      const result = await crawler._syncHotelPart('0xdummy', 'description');
       assert.equal(result.db.length, 1);
       assert.deepEqual(result.rawData, hotelData.DESCRIPTION);
     });
 
     it('should store data', async () => {
-      await crawler.syncHotelPart('0xdummy', 'description');
-      await crawler.syncHotelPart('0xdummy', 'ratePlans');
+      await crawler._syncHotelPart('0xdummy', 'description');
+      await crawler._syncHotelPart('0xdummy', 'ratePlans');
       const result = await db.select('address', 'part_name', 'raw_data')
         .from(HotelModel.TABLE);
       assert.equal(result.length, 2);
@@ -239,28 +239,10 @@ describe('services.crawler.index', () => {
         fetchRatePlans: sinon.stub().rejects(new FetcherRemoteError('fetcher error')),
       });
       try {
-        await crawler.syncHotelPart('0xdummy', 'ratePlans');
+        await crawler._syncHotelPart('0xdummy', 'ratePlans');
         throw new Error('should not have been called');
       } catch (e) {
         assert.match(e.message, /fetcher error/i);
-      }
-    });
-
-    it('should throw when hotelAddress is missing', async () => {
-      try {
-        await crawler.syncHotelPart();
-        throw new Error('should have not been called');
-      } catch (e) {
-        assert.match(e.message, /hotelAddress is required/i);
-      }
-    });
-
-    it('should throw when partName is missing', async () => {
-      try {
-        await crawler.syncHotelPart('0xdummy');
-        throw new Error('should have not been called');
-      } catch (e) {
-        assert.match(e.message, /partName is required/i);
       }
     });
   });
