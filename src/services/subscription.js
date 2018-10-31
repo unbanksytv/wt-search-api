@@ -1,5 +1,3 @@
-const url = require('url');
-
 const request = require('request-promise-native');
 
 const Subscription = require('../db/permanent/models/subscription');
@@ -21,12 +19,12 @@ async function _sendSubscriptionRequest (notificationsUri, hotelAddress, request
   try {
     response = await requestLib({
       method: 'POST',
-      uri: url.resolve(notificationsUri, '/subscriptions'),
+      uri: (new URL('/subscriptions', notificationsUri)).toString(),
       body: {
         wtIndex: wtIndexAddress,
         resourceType: 'hotel',
         resourceAddress: hotelAddress,
-        url: url.resolve(baseUrl, '/notifications'),
+        url: (new URL('/notifications', baseUrl)).toString(),
       },
       json: true,
       resolveWithFullResponse: true,
