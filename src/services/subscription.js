@@ -55,7 +55,11 @@ async function subscribeIfNeeded (notificationsUri, hotelAddress, requestLib) {
     return; // Nothing to do.
   }
   const remoteId = await _sendSubscriptionRequest(notificationsUri, hotelAddress, requestLib);
-  if (subscription) { // Notifications URI has changed.
+  if (subscription) {
+    // Notifications URI has changed. We don't need to
+    // unsubscribe from the previous notificationsUri because,
+    // presumably, updates for the given hotel will not be
+    // broadcast through it anyway.
     return Subscription.update(hotelAddress, { notificationsUri, remoteId });
   }
   return Subscription.create({ hotelAddress, remoteId, notificationsUri });
