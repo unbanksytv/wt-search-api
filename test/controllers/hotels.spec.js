@@ -17,7 +17,7 @@ describe('controllers - hotels', function () {
     await Location.upsert('0xdummy2', 41.5, 10);
     await Location.upsert('0xdummy3', 42, 10);
     await Location.upsert('0xdummy4', 42.5, 10);
-    await HotelModel.create([
+    await HotelModel.upsert([
       { address: '0xdummy1', partName: 'description', rawData: { name: 'dummy1' } },
       { address: '0xdummy2', partName: 'description', rawData: { name: 'dummy2' } },
       { address: '0xdummy3', partName: 'description', rawData: { name: 'dummy3' } },

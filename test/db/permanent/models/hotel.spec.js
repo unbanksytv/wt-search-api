@@ -10,9 +10,9 @@ describe('models.hotel', () => {
     await resetDB();
   });
 
-  describe('create', () => {
+  describe('upsert', () => {
     it('should insert data', async () => {
-      await Hotel.create({
+      await Hotel.upsert({
         address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
         partName: 'description',
         rawData: hotelData.DESCRIPTION,
@@ -25,7 +25,7 @@ describe('models.hotel', () => {
     });
 
     it('should insert multiple data at once', async () => {
-      await Hotel.create([
+      await Hotel.upsert([
         {
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           partName: 'description',
@@ -48,9 +48,40 @@ describe('models.hotel', () => {
       assert.deepEqual(JSON.parse(result[1].raw_data), hotelData.RATE_PLANS);
     });
 
+    it('should update existing records', async () => {
+      await Hotel.upsert([
+        {
+          address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
+          partName: 'ratePlans',
+          rawData: hotelData.RATE_PLANS,
+        },
+      ]);
+      await Hotel.upsert([
+        {
+          address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
+          partName: 'description',
+          rawData: { updated: true },
+        },
+      ]);
+      const result = await db.select('address', 'part_name', 'raw_data')
+        .from(Hotel.TABLE);
+      assert.equal(result.length, 2);
+      assert.equal(result[0].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
+      assert.equal(result[0].part_name, 'description');
+      assert.deepEqual(JSON.parse(result[0].raw_data), { updated: true });
+      assert.equal(result[1].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
+      assert.equal(result[1].part_name, 'ratePlans');
+      assert.deepEqual(JSON.parse(result[1].raw_data), hotelData.RATE_PLANS);
+    });
+
     it('should throw on missing required field', async () => {
       try {
-        await Hotel.create({
+        await Hotel.upsert({
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           partName: 'description',
         });
@@ -59,7 +90,7 @@ describe('models.hotel', () => {
         assert.match(e.message, /not null constraint failed/i);
       }
       try {
-        await Hotel.create({
+        await Hotel.upsert({
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           rawData: hotelData.RATE_PLANS,
         });
@@ -68,7 +99,7 @@ describe('models.hotel', () => {
         assert.match(e.message, /not null constraint failed/i);
       }
       try {
-        await Hotel.create({
+        await Hotel.upsert({
           partName: 'ratePlans',
           rawData: hotelData.RATE_PLANS,
         });
@@ -80,7 +111,7 @@ describe('models.hotel', () => {
 
     it('should throw on unsupported partName', async () => {
       try {
-        await Hotel.create({
+        await Hotel.upsert({
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           partName: 'RATE_PLANS',
           rawData: hotelData.RATE_PLANS,
@@ -92,32 +123,32 @@ describe('models.hotel', () => {
     });
   });
 
-  describe('getLatestHotelData', () => {
+  describe('getHotelData', () => {
     const hotelId = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     beforeEach(async () => {
-      await Hotel.create({
+      await Hotel.upsert({
         address: hotelId,
         partName: 'dataUris',
         rawData: {
           descriptionUri: 'schema://uri',
         },
       });
-      await Hotel.create({
+      await Hotel.upsert({
         address: hotelId,
         partName: 'description',
         rawData: { name: 'stale data' },
       });
-      await Hotel.create({
+      await Hotel.upsert({
         address: hotelId,
         partName: 'ratePlans',
         rawData: hotelData.RATE_PLANS,
       });
-      await Hotel.create({
+      await Hotel.upsert({
         address: hotelId,
         partName: 'availability',
         rawData: hotelData.AVAILABILITY,
       });
-      await Hotel.create({
+      await Hotel.upsert({
         address: hotelId,
         partName: 'description',
         rawData: hotelData.DESCRIPTION,
@@ -125,7 +156,7 @@ describe('models.hotel', () => {
     });
 
     it('should select all data parts by default', async () => {
-      const result = await Hotel.getLatestHotelData(hotelId);
+      const result = await Hotel.getHotelData(hotelId);
       assert.equal(result.address, hotelId);
       assert.isDefined(result.data);
       assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
@@ -135,7 +166,7 @@ describe('models.hotel', () => {
     });
 
     it('should optionally limit the selection of data parts', async () => {
-      const result = await Hotel.getLatestHotelData(hotelId, ['ratePlans']);
+      const result = await Hotel.getHotelData(hotelId, ['ratePlans']);
       assert.equal(result.address, hotelId);
       assert.property(result.data, 'ratePlans');
       assert.notProperty(result.data, 'description');
@@ -143,7 +174,7 @@ describe('models.hotel', () => {
     });
 
     it('should select only the latest part of the same type', async () => {
-      const result = await Hotel.getLatestHotelData(hotelId);
+      const result = await Hotel.getHotelData(hotelId);
       assert.equal(result.address, hotelId);
       assert.isDefined(result.data);
       assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
@@ -155,7 +186,7 @@ describe('models.hotel', () => {
 
   describe('delete', () => {
     it('should delete all parts of the selected hotel', async () => {
-      await Hotel.create([
+      await Hotel.upsert([
         {
           address: '0xtobedeleted',
           partName: 'description',

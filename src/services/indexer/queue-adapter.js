@@ -8,7 +8,7 @@ const indexer = new Indexer();
 async function indexHotel (payload) {
   const hotelAddress = payload.hotelAddress;
   logger.debug(`Indexing hotel ${hotelAddress}`);
-  const hotel = await Hotel.getLatestHotelData(hotelAddress);
+  const hotel = await Hotel.getHotelData(hotelAddress);
   await indexer.indexHotel(hotel);
 };
 

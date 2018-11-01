@@ -12,7 +12,7 @@ const createTable = async () => {
     table.timestamps(true, true);
 
     table.index(['address']);
-    table.index(['address', 'part_name', 'created_at']);
+    table.unique(['address', 'part_name']);
   });
 };
 
@@ -20,40 +20,41 @@ const dropTable = async () => {
   await db.schema.dropTableIfExists(TABLE);
 };
 
-const create = (hotelData) => {
+const upsert = async (hotelData) => {
   if (!hotelData || hotelData.length === 0) {
     throw new Error('No hotel data provided.');
   }
   if (!Array.isArray(hotelData)) {
     hotelData = [hotelData];
   }
-  // This actually returns a value from a numerical id column.
-  // It's not very reliable and the behaviour depends on used
-  // DB engine.
-  return db(TABLE)
-    .insert(hotelData.map((d) => {
-      return {
-        'address': d.address,
-        'part_name': d.partName,
-        'raw_data': JSON.stringify(d.rawData),
-      };
-    }));
+  for (let part of hotelData) {
+    const partName = part.partName || null,
+      address = part.address || null,
+      rawData = JSON.stringify(part.rawData) || null;
+    const modified = await db(TABLE)
+      .where({ 'address': address, 'part_name': partName })
+      .update({ 'raw_data': rawData });
+    if (modified > 0) {
+      continue;
+    }
+    await db(TABLE).insert({
+      'address': address,
+      'part_name': partName,
+      'raw_data': rawData,
+    });
+  }
 };
 
 const delete_ = (hotelAddress) => {
   return db(TABLE).where('address', hotelAddress).delete();
 };
 
-const getLatestHotelData = async (hotelAddress, partNames) => {
+const getHotelData = async (hotelAddress, partNames) => {
   partNames = partNames || ['description', 'ratePlans', 'availability'];
-  const result = await db.from(TABLE).whereIn('id', function () {
-    this.union(partNames.map((partName) => function () {
-      this.from(TABLE).max('id').where({
-        'address': hotelAddress,
-        'part_name': partName,
-      });
-    }));
-  }).select('raw_data', 'part_name', 'id');
+  const result = await db.from(TABLE)
+    .whereIn('part_name', partNames)
+    .andWhere('address', hotelAddress)
+    .select('raw_data', 'part_name', 'id');
 
   return result.map((p) => {
     return {
@@ -97,9 +98,9 @@ const getAddresses = async (limit, startWith) => {
 module.exports = {
   createTable,
   dropTable,
-  create,
+  upsert,
   delete: delete_,
-  getLatestHotelData,
+  getHotelData,
   getAddresses,
   TABLE,
   PART_NAMES,

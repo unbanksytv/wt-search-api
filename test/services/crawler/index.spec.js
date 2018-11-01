@@ -124,9 +124,9 @@ describe('services.crawler.index', () => {
     });
 
     it('should do only one db insert for non dataUris', async () => {
-      const createSpy = sinon.spy(HotelModel, 'create');
+      const upsertSpy = sinon.spy(HotelModel, 'upsert');
       await crawler.syncHotel('0xdummy');
-      assert.equal(createSpy.callCount, 2);
+      assert.equal(upsertSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
         .from(HotelModel.TABLE);
       assert.equal(result.length, 4);
@@ -138,18 +138,18 @@ describe('services.crawler.index', () => {
       assert.equal(result[2].part_name, 'ratePlans');
       assert.equal(result[3].address, '0xdummy');
       assert.equal(result[3].part_name, 'availability');
-      createSpy.restore();
+      upsertSpy.restore();
     });
 
     it('should not panic on fetch error of data document', async () => {
-      const createSpy = sinon.spy(HotelModel, 'create');
+      const upsertSpy = sinon.spy(HotelModel, 'upsert');
       crawler.getFetcher().fetchDescription = sinon.stub().rejects(new FetcherRemoteError('fetcher error'));
       await crawler.syncHotel('0xdummy');
       assert.equal(crawler.getFetcher().fetchDescription.callCount, 1);
       assert.equal(fetchRatePlansStub.callCount, 1);
       assert.equal(fetchAvailabilityStub.callCount, 1);
       assert.equal(fetchDataUrisStub.callCount, 1);
-      assert.equal(createSpy.callCount, 2);
+      assert.equal(upsertSpy.callCount, 2);
       const result = await db.select('address', 'part_name', 'raw_data')
         .from(HotelModel.TABLE);
       assert.equal(result.length, 3);
@@ -159,15 +159,15 @@ describe('services.crawler.index', () => {
       assert.equal(result[1].part_name, 'ratePlans');
       assert.equal(result[2].address, '0xdummy');
       assert.equal(result[2].part_name, 'availability');
-      createSpy.restore();
+      upsertSpy.restore();
     });
 
     it('should not panic when empty response is returned for a particular resource', async () => {
-      const createSpy = sinon.spy(HotelModel, 'create');
+      const upsertSpy = sinon.spy(HotelModel, 'upsert');
       crawler.getFetcher().fetchAvailability = sinon.stub().resolves();
       await crawler.syncHotel('0xdummy');
-      assert.equal(createSpy.callCount, 2);
-      createSpy.restore();
+      assert.equal(upsertSpy.callCount, 2);
+      upsertSpy.restore();
     });
 
     it('should throw when hotelAddress is missing', async () => {
@@ -206,7 +206,6 @@ describe('services.crawler.index', () => {
 
     it('should return downloaded data', async () => {
       const result = await crawler._syncHotelPart('0xdummy', 'description');
-      assert.equal(result.db.length, 1);
       assert.deepEqual(result.rawData, hotelData.DESCRIPTION);
     });
 

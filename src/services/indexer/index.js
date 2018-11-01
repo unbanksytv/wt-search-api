@@ -16,7 +16,7 @@ class Indexer {
   /**
   * Index a single hotel.
   *
-  * @param {Object} hotel as returned from Hotel.getLatestHotelData.
+  * @param {Object} hotel as returned from Hotel.getHotelData.
   * @return {Promise<void>}
   *
   */

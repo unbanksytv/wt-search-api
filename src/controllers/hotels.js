@@ -21,7 +21,7 @@ const indexer = new Indexer();
 async function _augmentWithData (hotelAddresses, queryParams) {
   const ret = [];
   for (let address of hotelAddresses) {
-    const hotel = await HotelModel.getLatestHotelData(address, ['description']);
+    const hotel = await HotelModel.getHotelData(address, ['description']);
     ret.push(Object.assign({ id: address }, hotel.data.description));
   }
   return ret;

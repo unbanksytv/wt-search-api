@@ -43,7 +43,7 @@ class Crawler {
     this.config.logger.debug(`Saving ${hotelAddress} into database`);
     return {
       rawData: rawData,
-      db: await HotelModel.create({
+      db: await HotelModel.upsert({
         address: hotelAddress,
         partName: partName,
         rawData: rawData,
@@ -130,7 +130,7 @@ class Crawler {
       }).filter((p) => !!p);
       if (hotelData.length !== 0) {
         this.config.logger.debug(`Saving ${hotelAddress} into database`);
-        await HotelModel.create(hotelData);
+        await HotelModel.upsert(hotelData);
         if (this.config.triggerIndexing) {
           this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
         }
