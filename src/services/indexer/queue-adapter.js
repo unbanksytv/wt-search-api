@@ -28,7 +28,5 @@ const registerProcessors = () => {
 };
 
 module.exports = {
-  indexHotel,
-  deindexHotel,
   registerProcessors,
 };

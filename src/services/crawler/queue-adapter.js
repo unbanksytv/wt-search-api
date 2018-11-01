@@ -37,8 +37,5 @@ const registerProcessors = () => {
 };
 
 module.exports = {
-  syncAll,
-  syncHotel,
-  deleteHotel,
   registerProcessors,
 };
