@@ -32,10 +32,7 @@ describe('services.crawler.index', () => {
     });
 
     it('should reuse fetcher instance', () => {
-      let crawler = new Crawler({
-        readApiUrl: 'https://read-api.wt.com',
-        logger: logger,
-      });
+      let crawler = new Crawler({ logger: logger });
       assert.isUndefined(crawler._fetcher);
       const fetcher1 = crawler.getFetcher();
       assert.isDefined(crawler._fetcher);
@@ -50,10 +47,7 @@ describe('services.crawler.index', () => {
 
     beforeEach(async () => {
       await resetDB();
-      crawler = new Crawler({
-        readApiUrl: 'https://read-api.wt.com',
-        logger: logger,
-      });
+      crawler = new Crawler({ logger: logger });
       syncHotelStub = sinon.stub().resolves([0]);
       fetchHotelListStub = sinon.stub().callsFake((opts) => {
         opts.onEveryPage && opts.onEveryPage({ addresses: [1, 2, 3] });
@@ -89,10 +83,7 @@ describe('services.crawler.index', () => {
 
     beforeEach(async () => {
       await resetDB();
-      crawler = new Crawler({
-        readApiUrl: 'https://read-api.wt.com',
-        logger: logger,
-      });
+      crawler = new Crawler({ logger: logger });
       fetchDescriptionStub = sinon.stub().resolves(hotelData.DESCRIPTION);
       fetchRatePlansStub = sinon.stub().resolves(hotelData.RATE_PLANS);
       fetchAvailabilityStub = sinon.stub().resolves(hotelData.AVAILABILITY);
@@ -195,10 +186,7 @@ describe('services.crawler.index', () => {
 
     beforeEach(async () => {
       await resetDB();
-      crawler = new Crawler({
-        readApiUrl: 'https://read-api.wt.com',
-        logger: logger,
-      });
+      crawler = new Crawler({ logger: logger });
       fetchDescriptionStub = sinon.stub().resolves(hotelData.DESCRIPTION);
       fetchRatePlansStub = sinon.stub().resolves(hotelData.RATE_PLANS);
       crawler.getFetcher = sinon.stub().returns({
@@ -259,10 +247,7 @@ describe('services.crawler.index', () => {
     });
 
     beforeEach(async () => {
-      crawler = new Crawler({
-        readApiUrl: 'https://read-api.wt.com',
-        logger: logger,
-      });
+      crawler = new Crawler({ logger: logger });
     });
 
     it('should delete the specified hotel', async () => {
