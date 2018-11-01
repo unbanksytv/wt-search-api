@@ -43,4 +43,17 @@ describe('models.location', () => {
       ]);
     });
   });
+
+  describe('delete', () => {
+    it('should delete the previously created record', async () => {
+      await resetDB();
+      await Location.upsert('0xtobedeleted', 10, 10);
+      await Location.upsert('0xtobekept', 40, 40);
+      await Location.delete('0xtobedeleted');
+      const records = await db(Location.TABLE).select('hotel_address');
+      assert.deepEqual(records, [{
+        'hotel_address': '0xtobekept',
+      }]);
+    });
+  });
 });

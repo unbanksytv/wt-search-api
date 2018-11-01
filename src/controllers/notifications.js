@@ -11,8 +11,12 @@ module.exports.accept = async (req, res, next) => {
   try {
     const notification = req.body;
     validateNotification(notification);
+    let messageType = 'syncHotel';
+    if (notification.scope && notification.scope.action === 'delete') {
+      messageType = 'deleteHotel';
+    }
     Queue.get().enqueue({
-      type: 'syncHotel',
+      type: messageType,
       payload: {
         hotelAddress: notification.resourceAddress,
       },

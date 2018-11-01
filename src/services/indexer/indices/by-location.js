@@ -135,7 +135,7 @@ function getSorting (query) {
 /**
 * Index a single hotel.
 *
-* @param {hotel} hotel as returned from Hotel.getLatestHotelData.
+* @param {Object} hotel as returned from Hotel.getLatestHotelData.
 * @return {Promise<void>}
 *
 */
@@ -146,6 +146,17 @@ async function indexHotel (hotel) {
   }
 }
 
+/**
+* Deindex a single hotel.
+*
+* @param {String} hotelAddress
+* @return {Promise<void>}
+*
+*/
+async function deindexHotel (hotelAddress) {
+  await Location.delete(hotelAddress);
+}
+
 module.exports = {
   _convertKilometersToDegrees,
   _getFilter,
@@ -153,4 +164,5 @@ module.exports = {
   getFiltering,
   getSorting,
   indexHotel,
+  deindexHotel,
 };

@@ -20,6 +20,10 @@ const syncAll = () => {
   return crawler.syncAllHotels();
 };
 
+const deleteHotel = (payload) => {
+  return crawler.deleteHotel(payload.hotelAddress);
+};
+
 const registerProcessors = () => {
   worker.register('syncHotel', (data) => {
     return syncHotel(data);
@@ -27,10 +31,14 @@ const registerProcessors = () => {
   worker.register('syncAll', (data) => {
     return syncAll();
   });
+  worker.register('deleteHotel', (data) => {
+    return deleteHotel(data);
+  });
 };
 
 module.exports = {
   syncAll,
   syncHotel,
+  deleteHotel,
   registerProcessors,
 };

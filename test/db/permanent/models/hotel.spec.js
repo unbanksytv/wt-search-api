@@ -152,4 +152,30 @@ describe('models.hotel', () => {
       assert.isUndefined(result.data.dataUris);
     });
   });
+
+  describe('delete', () => {
+    it('should delete all parts of the selected hotel', async () => {
+      await Hotel.create([
+        {
+          address: '0xtobedeleted',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xtobedeleted',
+          partName: 'ratePlans',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xtobekept',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+      ]);
+      await Hotel.delete('0xtobedeleted');
+      const result = await db.select('address').from(Hotel.TABLE);
+      assert.equal(result.length, 1);
+      assert.equal(result[0].address, '0xtobekept');
+    });
+  });
 });

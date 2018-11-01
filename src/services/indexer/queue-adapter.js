@@ -12,13 +12,23 @@ async function indexHotel (payload) {
   await indexer.indexHotel(hotel);
 };
 
+async function deindexHotel (payload) {
+  const hotelAddress = payload.hotelAddress;
+  logger.debug(`Deindexing hotel ${hotelAddress}`);
+  await indexer.deindexHotel(hotelAddress);
+};
+
 const registerProcessors = () => {
   worker.register('indexHotel', (data) => {
     return indexHotel(data);
+  });
+  worker.register('deindexHotel', (data) => {
+    return deindexHotel(data);
   });
 };
 
 module.exports = {
   indexHotel,
+  deindexHotel,
   registerProcessors,
 };

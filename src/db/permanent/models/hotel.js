@@ -40,6 +40,10 @@ const create = (hotelData) => {
     }));
 };
 
+const delete_ = (hotelAddress) => {
+  return db(TABLE).where('address', hotelAddress).delete();
+};
+
 const getLatestHotelData = async (hotelAddress, partNames) => {
   partNames = partNames || ['description', 'ratePlans', 'availability'];
   const result = await db.from(TABLE).whereIn('id', function () {
@@ -94,6 +98,7 @@ module.exports = {
   createTable,
   dropTable,
   create,
+  delete: delete_,
   getLatestHotelData,
   getAddresses,
   TABLE,

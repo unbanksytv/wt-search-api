@@ -145,6 +145,17 @@ class Crawler {
       throw e;
     };
   }
+
+  async deleteHotel (hotelAddress) {
+    if (!hotelAddress) {
+      throw new CrawlerError('hotelAddress is required to deleteHotel.');
+    }
+    this.config.logger.debug(`Deleting hotel ${hotelAddress} locally.`);
+    await HotelModel.delete(hotelAddress);
+    if (this.config.triggerIndexing) {
+      this.queue.enqueue({ type: 'deindexHotel', payload: { hotelAddress } });
+    }
+  }
 }
 
 module.exports = Crawler;

@@ -16,13 +16,26 @@ class Indexer {
   /**
   * Index a single hotel.
   *
-  * @param {hotel} hotel as returned from Hotel.getLatestHotelData.
+  * @param {Object} hotel as returned from Hotel.getLatestHotelData.
   * @return {Promise<void>}
   *
   */
   async indexHotel (hotel) {
     for (let indexer of INDEXERS) {
       await indexer.indexHotel(hotel);
+    }
+  }
+
+  /**
+  * Deindex a single hotel.
+  *
+  * @param {String} hotelAddress
+  * @return {Promise<void>}
+  *
+  */
+  async deindexHotel (hotelAddress) {
+    for (let indexer of INDEXERS) {
+      await indexer.deindexHotel(hotelAddress);
     }
   }
 

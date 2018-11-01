@@ -246,4 +246,29 @@ describe('services.crawler.index', () => {
       }
     });
   });
+
+  describe('deleteHotel', () => {
+    let crawler;
+
+    before(() => {
+      sinon.stub(HotelModel, 'delete').returns(Promise.resolve());
+    });
+
+    after(() => {
+      HotelModel.delete.restore();
+    });
+
+    beforeEach(async () => {
+      crawler = new Crawler({
+        readApiUrl: 'https://read-api.wt.com',
+        logger: logger,
+      });
+    });
+
+    it('should delete the specified hotel', async () => {
+      HotelModel.delete.resetHistory();
+      crawler.deleteHotel('0xdummy');
+      assert.deepEqual(HotelModel.delete.args, [['0xdummy']]);
+    });
+  });
 });

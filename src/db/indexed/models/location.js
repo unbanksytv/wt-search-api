@@ -19,7 +19,7 @@ const dropTable = async () => {
 /**
  * Create or insert hotel location data.
  *
- * @param {Integer} hotelAddress
+ * @param {String} hotelAddress
  * @param {Number} lat in degrees
  * @param {Number} lng in degrees
  * @return {Promise<void>}
@@ -39,9 +39,20 @@ const upsert = async (hotelAddress, lat, lng) => {
   }
 };
 
+/**
+ * Delete hotel location data
+ *
+ * @param {String} hotelAddress
+ * @return {Promise<void>}
+ */
+const delete_ = async (hotelAddress) => {
+  await db(TABLE).where({ 'hotel_address': hotelAddress }).delete();
+};
+
 module.exports = {
   createTable,
   dropTable,
   upsert,
+  delete: delete_,
   TABLE,
 };

@@ -189,4 +189,22 @@ describe('indices.by-location', () => {
       assert.equal(byLocation.getSorting(query), undefined);
     });
   });
+
+  describe('deindexHotel', () => {
+    beforeEach(async () => {
+      await resetDB();
+    });
+
+    it('should remove the previously created location', async () => {
+      await byLocation.indexHotel({
+        address: '0xdummy',
+        data: { description: { location: { lat: 10, lng: 10 } } },
+      });
+      let records = await db(Location.TABLE).select('hotel_address');
+      assert.equal(records.length, 1);
+      await byLocation.deindexHotel('0xdummy');
+      records = await db(Location.TABLE).select('hotel_address');
+      assert.equal(records.length, 0);
+    });
+  });
 });
