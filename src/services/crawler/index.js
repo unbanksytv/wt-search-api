@@ -58,7 +58,6 @@ class Crawler {
     if (!notificationsUri) {
       return; // Nothing to do.
     }
-    this.config.logger.debug(`Subscribing for update notifications for ${hotelAddress} at ${notificationsUri}`);
     try {
       await subscription.subscribeIfNeeded(notificationsUri, hotelAddress);
     } catch (err) {

@@ -1,7 +1,7 @@
 const request = require('request-promise-native');
 
 const Subscription = require('../db/permanent/models/subscription');
-const { baseUrl } = require('../config');
+const { baseUrl, logger } = require('../config');
 const wtIndexGetter = require('./wt-index-getter');
 
 class RemoteError extends Error {};
@@ -57,6 +57,7 @@ async function subscribeIfNeeded (notificationsUri, hotelAddress, requestLib) {
     return; // Nothing to do.
   }
   const remoteId = await _sendSubscriptionRequest(notificationsUri, hotelAddress, requestLib);
+  logger.debug(`Subscribing for update notifications for ${hotelAddress} at ${notificationsUri}`);
   if (subscription) {
     // Notifications URI has changed. We don't need to
     // unsubscribe from the previous notificationsUri because,
