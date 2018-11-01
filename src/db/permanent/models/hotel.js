@@ -27,6 +27,7 @@ const upsert = async (hotelData) => {
   if (!Array.isArray(hotelData)) {
     hotelData = [hotelData];
   }
+  const toInsert = [];
   for (let part of hotelData) {
     const partName = part.partName || null,
       address = part.address || null,
@@ -37,11 +38,14 @@ const upsert = async (hotelData) => {
     if (modified > 0) {
       continue;
     }
-    await db(TABLE).insert({
+    toInsert.push({
       'address': address,
       'part_name': partName,
       'raw_data': rawData,
     });
+  }
+  if (toInsert.length > 0) {
+    await db(TABLE).insert(toInsert);
   }
 };
 
