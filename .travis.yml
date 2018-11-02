@@ -12,3 +12,29 @@ jobs:
     - npm run lint
     - npm test
     - npm run coverage
+  - stage: Build docker image and upload to AWS
+    sudo: true
+    services:
+    - docker
+    install: true
+    if: tag IS present
+    script:
+    - pip install --user awscli
+    - export PATH=$PATH:$HOME/.local/bin
+    - eval $(aws ecr get-login --no-include-email --region eu-west-1)
+    - echo "Building for playground"
+    - docker build --build-arg WT_CONFIG=playground -t wt-search-api:$TRAVIS_BRANCH-playground .
+    - docker tag wt-search-api:$TRAVIS_BRANCH-playground 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-playground
+    - docker push 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-playground
+  - stage: Start service from docker with latest merged tag
+    install: true
+    sudo: true
+    if: branch = release/playground
+    script:
+    - pip install --user awscli
+    - export PATH=$PATH:$HOME/.local/bin
+    - npm run deploy-aws-playground
+env:
+  global:
+  - secure: XW8DIMwFwSOUbEiF3/WlJ2nxQd1Esr3lFsmG9uoGRTheRapByO3vuomuIfkLzOVEAZMn9ARacnpGbVyWN0TP8ats8VcthBLTQfo225fh5NfgzIggsSaszfrYb+LAHWmE6V+aaSRtg258hR+POglDP7t8yLcDiNMZGuMM++FoMosInvtaBrLkfcfpdnLjbEFUCzSh+eiXbNqLJNCvc5zNaIaM/Kd00ylAYdIntD4fww12Oqzwv00CxzAwvHqP/rpayoI2KkpEW/tdYOftDBi+cbj7UShYb3QCPZZyRgBYLBJ3whOTVC3g+WOSwRQyqWs2ohKTQ6Tj8vl2bYCDvdiax9esFBMAy0HCi8jHaqw3dQFZoIFO9lEkjkAiHFkBpnGsm6to8I1B/6QrDaFZz4d4yFFvvneYpD5e3UrGSqDpTwTgdEZXSw5GJ0WD2bPkAHCjJRX8QGGeVsEOIwHHEu7UlBWXKNn3KO7sswUJYHskDkjaQFTAa69jVYcoGrA5cJkLG21nRFOlxsEz/rSQpVTpqchkQlrmGhozDs7wbKrDzrPD0gzXP8rvwQnRy6CSAS3Knxy+ZEOIMLvbo0nh1eKzaTojoAWNnaMIdtDq0MB/Thz5GGzwgqEMJrzXe1QYHtj2PuAluWJgnyDqymR+7P1lPneGUOvC2YHpLnLU+pRaSsM=
+  - secure: nmnoV59Ffge+VnhOd978AnQQBSTzeZMCOItdo+LD6KQapXuZoo7Fyy57BRQvBUt3AKK8HN1QRMPwjQKe5ecSrIYaXnJM+nLFyhl9kaQ4Zw6AVdEbelgnmb+INrE9oSUUmBWbdeeriY/aSQ6dIl2UHJoDjulmyYDfnoJ8gFzo51B+yOn5wvWFVINxshFSB9cmYE5oW8FQUiMnx0CF5L28CcRcmrFxiUnDngYDQJl67LqIlsVjVo86c6mntGm2jlbUStZRUnwaK6hzqeikbivL8aLnmIV3dHW7Gg87hiui13v4uLe6xXWDYymxq2kOPIVgbv+uKquXBjpWMbDb6FzdZW9BbV+hIuzCuNyDXou32hbwurePvzm7mu1Csea2urI2pFgkgGGID4zeMPJ/XKcKI6Rl4oWLKrQNarhMzhZhbnzRNvUMAEgB2Gj8l36zq6i22e5bKZ6J4xfHHQ/THgqsH/0i71OhEWrN3Tm8b83LPJ8UAY0kD8ekscUXTrpxBCi3jcPWfEFQ1iLng9Ek+42FSUauE5FWerL/ulH9Md+MbrrB1zbjRnoQTVwXYvu7YBpCEnLI1Vgt5XBU3yVMfAiuHIm+9Pn3JpuECDHwiHHzQYtytJjmOLj/l5slZJEkkYL+aExw29AG/ALeigJ3Ncybk2kZ+QlmYIxdVkjGnwuBI3g=
