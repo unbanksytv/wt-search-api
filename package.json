@@ -11,7 +11,8 @@
     "start": "node src/index.js",
     "dev": "WT_CONFIG=dev node src/index.js",
     "createdb-dev": "WT_CONFIG=dev node management/createdb.js",
-    "createdb": "node management/createdb.js"
+    "createdb": "node management/createdb.js",
+    "deploy-aws-playground": "./management/deploy-aws.sh playground"
   },
   "repository": {
     "type": "git",
