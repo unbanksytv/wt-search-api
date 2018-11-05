@@ -30,7 +30,7 @@ TASK_DEF="[{\"portMappings\": [{\"hostPort\": 0,\"protocol\": \"tcp\",\"containe
       }
     ],
     \"image\": \"029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$LATEST_TAG-$ENVIRONMENT\",
-    \"name\": \"$ENVIRONMENT-wt-search-api\",
+    \"name\": \"wt-search-api\",
     \"memoryReservation\": 128,
     \"cpu\": 128
   }]"
