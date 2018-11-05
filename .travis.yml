@@ -26,6 +26,10 @@ jobs:
     - docker build --build-arg WT_CONFIG=playground -t wt-search-api:$TRAVIS_BRANCH-playground .
     - docker tag wt-search-api:$TRAVIS_BRANCH-playground 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-playground
     - docker push 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-playground
+    - echo "Building for demo"
+    - docker build --build-arg WT_CONFIG=demo -t wt-search-api:$TRAVIS_BRANCH-demo .
+    - docker tag wt-search-api:$TRAVIS_BRANCH-demo 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-demo
+    - docker push 029479441096.dkr.ecr.eu-west-1.amazonaws.com/wt-search-api:$TRAVIS_BRANCH-demo
   - stage: Start service from docker with latest merged tag
     install: true
     sudo: true
@@ -37,11 +41,11 @@ jobs:
   - stage: Start service from docker with latest merged tag
     install: true
     sudo: true
-    if: branch = release/playground
+    if: branch = release/demo
     script:
     - pip install --user awscli
     - export PATH=$PATH:$HOME/.local/bin
-    - npm run deploy-aws-playground
+    - npm run deploy-aws-demo
 env:
   global:
   - secure: XW8DIMwFwSOUbEiF3/WlJ2nxQd1Esr3lFsmG9uoGRTheRapByO3vuomuIfkLzOVEAZMn9ARacnpGbVyWN0TP8ats8VcthBLTQfo225fh5NfgzIggsSaszfrYb+LAHWmE6V+aaSRtg258hR+POglDP7t8yLcDiNMZGuMM++FoMosInvtaBrLkfcfpdnLjbEFUCzSh+eiXbNqLJNCvc5zNaIaM/Kd00ylAYdIntD4fww12Oqzwv00CxzAwvHqP/rpayoI2KkpEW/tdYOftDBi+cbj7UShYb3QCPZZyRgBYLBJ3whOTVC3g+WOSwRQyqWs2ohKTQ6Tj8vl2bYCDvdiax9esFBMAy0HCi8jHaqw3dQFZoIFO9lEkjkAiHFkBpnGsm6to8I1B/6QrDaFZz4d4yFFvvneYpD5e3UrGSqDpTwTgdEZXSw5GJ0WD2bPkAHCjJRX8QGGeVsEOIwHHEu7UlBWXKNn3KO7sswUJYHskDkjaQFTAa69jVYcoGrA5cJkLG21nRFOlxsEz/rSQpVTpqchkQlrmGhozDs7wbKrDzrPD0gzXP8rvwQnRy6CSAS3Knxy+ZEOIMLvbo0nh1eKzaTojoAWNnaMIdtDq0MB/Thz5GGzwgqEMJrzXe1QYHtj2PuAluWJgnyDqymR+7P1lPneGUOvC2YHpLnLU+pRaSsM=
