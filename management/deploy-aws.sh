@@ -15,6 +15,14 @@ WT_CONFIG=$ENVIRONMENT
 # Change port, environment variables, memoryReservation and cpu to be in line with your task
 # definition.
 TASK_DEF="[{\"portMappings\": [{\"hostPort\": 0,\"protocol\": \"tcp\",\"containerPort\": 1918}],
+   \"logConfiguration\": {
+      \"logDriver\": \"awslogs\",
+      \"options\": {
+        \"awslogs-group\": \"shared-docker-cluster-t3\",
+        \"awslogs-region\": \"$AWS_REGION\",
+        \"awslogs-stream-prefix\": \"$ENVIRONMENT-wt-search-api\"
+      }
+    },
     \"environment\": [
       {
         \"name\": \"WT_CONFIG\",
