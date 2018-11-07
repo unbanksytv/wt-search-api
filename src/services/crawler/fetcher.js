@@ -111,8 +111,8 @@ class Fetcher {
     }, options));
   };
 
-  fetchDataUris (hotelAddress) {
-    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}/dataUris`);
+  fetchMeta (hotelAddress) {
+    return this._fetchHotelResource(hotelAddress, `${readApiUrl}/hotels/${hotelAddress}/meta`);
   };
 
   fetchDescription (hotelAddress) {
