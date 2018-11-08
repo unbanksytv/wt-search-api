@@ -11,7 +11,7 @@ Work in progress. Discussion on https://groups.google.com/forum/#!topic/windingt
 - Hotel writes its data to the platform with Write API.
 - Write API sends notifications about hotel data changes via Update API.
 - If a new hotel pops up, Subscriptions Management makes sure that the Search API is tracking all the hotel data changes.
-- Subscription handler (or Resync cron job) tells the Crawler to collect the changed data via Read API.
+- Subscription handler (or Resync cron job) tells the Crawler to collect the changed data via Read API (currently, the version 0.8.x is assumed).
 - Crawler puts a copy of the data to Permanent storage.
 - Crawler also bumps the Indexer and Price Computation components to start work with the changed data.
 - Indexer re-indexes the hotel data from Permanent Storage to make search easier where possible (such as location data, description for fulltext etc.) and puts them to Indexed Storage.
