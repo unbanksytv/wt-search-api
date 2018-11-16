@@ -284,7 +284,7 @@ describe('services.crawler.fetcher', () => {
     });
   });
 
-  describe('fetchDataUris', () => {
+  describe('fetchMeta', () => {
     const hotelAddress = '0xc2954b66EB27A20c936A3D8F2365FE9349472663';
     let fetcher;
 
@@ -292,27 +292,29 @@ describe('services.crawler.fetcher', () => {
       fetcher = new Fetcher();
     });
 
-    it('should return dataUris object', async () => {
+    it('should return meta info object', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelAddress}/dataUris`)
+        .get(`/hotels/${hotelAddress}/meta`)
         .reply(200, {
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
           dataUri: 'https://jirkachadima.cz/wt/http/index.json',
           descriptionUri: 'https://jirkachadima.cz/wt/http/description.json',
           ratePlansUri: 'https://jirkachadima.cz/wt/http/rate-plans.json',
           availabilityUri: 'https://jirkachadima.cz/wt/http/availability.json',
+          dataFormatVersion: '0.1.0',
         });
-      const result = await fetcher.fetchDataUris(hotelAddress);
+      const result = await fetcher.fetchMeta(hotelAddress);
       assert.equal(result.address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result.dataUri, 'https://jirkachadima.cz/wt/http/index.json');
       assert.equal(result.descriptionUri, 'https://jirkachadima.cz/wt/http/description.json');
       assert.equal(result.ratePlansUri, 'https://jirkachadima.cz/wt/http/rate-plans.json');
       assert.equal(result.availabilityUri, 'https://jirkachadima.cz/wt/http/availability.json');
+      assert.equal(result.dataFormatVersion, '0.1.0');
     });
 
     it('should throw when hotelAddress is not passed', async () => {
       try {
-        await fetcher.fetchDataUris();
+        await fetcher.fetchMeta();
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /hotelAddress is required/i);
@@ -321,10 +323,10 @@ describe('services.crawler.fetcher', () => {
 
     it('should throw on non-success response', async () => {
       nock(readApiUrl)
-        .get(`/hotels/${hotelAddress}/dataUris`)
+        .get(`/hotels/${hotelAddress}/meta`)
         .reply(502);
       try {
-        await fetcher.fetchDataUris(hotelAddress);
+        await fetcher.fetchMeta(hotelAddress);
         throw new Error('should have never been called');
       } catch (e) {
         assert.match(e.message, /responded with 502/i);

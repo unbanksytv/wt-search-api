@@ -1,7 +1,7 @@
 const { db } = require('../../../config');
 
 const TABLE = 'hotels',
-  PART_NAMES = ['description', 'ratePlans', 'availability', 'dataUris'];
+  PART_NAMES = ['description', 'ratePlans', 'availability', 'meta'];
 
 const createTable = async () => {
   await db.schema.createTable(TABLE, (table) => {
