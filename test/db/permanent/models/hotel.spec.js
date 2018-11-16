@@ -128,7 +128,7 @@ describe('models.hotel', () => {
     beforeEach(async () => {
       await Hotel.upsert({
         address: hotelId,
-        partName: 'dataUris',
+        partName: 'meta',
         rawData: {
           descriptionUri: 'schema://uri',
         },
@@ -162,7 +162,7 @@ describe('models.hotel', () => {
       assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
       assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
       assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
-      assert.isUndefined(result.data.dataUris);
+      assert.isUndefined(result.data.meta);
     });
 
     it('should optionally limit the selection of data parts', async () => {
@@ -180,7 +180,7 @@ describe('models.hotel', () => {
       assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
       assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
       assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
-      assert.isUndefined(result.data.dataUris);
+      assert.isUndefined(result.data.meta);
     });
   });
 

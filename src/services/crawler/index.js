@@ -97,12 +97,12 @@ class Crawler {
     if (!hotelAddress) {
       throw new CrawlerError('hotelAddress is required to syncHotel.');
     }
-    this.config.logger.debug(`Fetching ${hotelAddress} /dataUris`);
+    this.config.logger.debug(`Fetching ${hotelAddress} /meta`);
     try {
-      const indexData = await this._syncHotelPart(hotelAddress, 'dataUris');
-      const dataUris = indexData.rawData;
+      const indexData = await this._syncHotelPart(hotelAddress, 'meta');
+      const meta = indexData.rawData;
       const parts = HotelModel.PART_NAMES.filter((p) => {
-        return typeof dataUris[`${p}Uri`] === 'string';
+        return typeof meta[`${p}Uri`] === 'string';
       });
       const hotelPartPromises = [];
       for (let hotelPartName of parts) {
