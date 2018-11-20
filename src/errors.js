@@ -24,6 +24,11 @@ HttpBadRequestError.status = 400;
 HttpBadRequestError.defaultCode = 'badRequest';
 HttpBadRequestError.defaultMsgShort = 'Bad request.';
 
+class HttpUnauthorizedError extends HttpError {};
+HttpUnauthorizedError.status = 401;
+HttpUnauthorizedError.defaultCode = 'unauthorized';
+HttpUnauthorizedError.defaultMsgShort = 'Unauthorized.';
+
 class Http404Error extends HttpError {};
 Http404Error.status = 404;
 Http404Error.defaultCode = 'notFound';
@@ -38,6 +43,7 @@ HttpInternalError.defaultMsgLong = 'Something went wrong. Please contact the adm
 
 module.exports = {
   HttpError,
+  HttpUnauthorizedError,
   Http404Error,
   HttpBadRequestError,
   HttpInternalError,

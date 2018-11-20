@@ -77,7 +77,14 @@ paths:
                       https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/UriType
         '400':
           $ref: '#/components/responses/BadRequestError'
-  /notifications:
+  '/notifications/{subscription_token}':
+    parameters:
+      - name: subscription_token
+        required: true
+        in: path
+        description: An opaque subscription token.
+        schema:
+          type: string
     post:
       summary: Publish an update notification. Facilitates the consumer webhook endpoint for wt-update-api.
       requestBody:
@@ -91,6 +98,8 @@ paths:
           description: Notification has been accepted.
         '400':
           $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 components:
   responses:
     BadRequestError:
@@ -101,6 +110,12 @@ components:
             $ref: '#/components/schemas/Error'
     UnprocessableEntityError:
       description: Request body or params validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedError:
+      description: The provided subscription token and hotel address pair does not match any existing subscription.
       content:
         application/json:
           schema:

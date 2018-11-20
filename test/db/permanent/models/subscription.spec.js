@@ -5,23 +5,36 @@ const { db } = require('../../../../src/config');
 const Subscription = require('../../../../src/db/permanent/models/subscription');
 
 describe('models.subscription', () => {
+  describe('generateToken', () => {
+    it('should generate a unique token', async () => {
+      const token = await Subscription.generateToken();
+      assert.equal(typeof token, 'string');
+      const token2 = await Subscription.generateToken();
+      assert.notEqual(token, token2);
+    });
+  });
+
   describe('create', () => {
     beforeEach(async () => {
       await resetDB();
     });
 
     it('should insert data', async () => {
+      const token = await Subscription.generateToken();
       await Subscription.create({
         hotelAddress: '0xdummy',
         remoteId: 'dummy_remote_id',
         notificationsUri: 'dummy_uri',
+        token,
       });
-      const result = await db.select('hotel_address', 'remote_id', 'notifications_uri')
+      const result = await db.select('hotel_address', 'remote_id', 'notifications_uri', 'token')
         .from(Subscription.TABLE);
+
       assert.deepEqual(result[0], {
         'hotel_address': '0xdummy',
         'remote_id': 'dummy_remote_id',
         'notifications_uri': 'dummy_uri',
+        'token': token,
       });
     });
 
@@ -30,6 +43,7 @@ describe('models.subscription', () => {
         hotelAddress: '0xdummy',
         remoteId: 'dummy_remote_id',
         notificationsUri: 'dummy_uri',
+        token: await Subscription.generateToken(),
       });
       let errored = false;
       try {
@@ -37,6 +51,7 @@ describe('models.subscription', () => {
           hotelAddress: '0xdummy',
           remoteId: 'dummy_remote_id',
           notificationsUri: 'dummy_uri',
+          token: await Subscription.generateToken(),
         });
       } catch (err) {
         errored = true;
@@ -48,21 +63,25 @@ describe('models.subscription', () => {
   });
 
   describe('get', async () => {
+    let token;
     beforeEach(async () => {
       await resetDB();
+      token = await Subscription.generateToken();
       await Subscription.create({
         hotelAddress: '0xdummy',
         remoteId: 'dummy_remote_id',
         notificationsUri: 'dummy_uri',
+        token,
       });
     });
 
     it('should return the existing subscription', async () => {
       const result = await Subscription.get('0xdummy');
       assert.deepEqual(result, {
-        hotelAddress: '0xdummy',
-        remoteId: 'dummy_remote_id',
-        notificationsUri: 'dummy_uri',
+        'hotelAddress': '0xdummy',
+        'remoteId': 'dummy_remote_id',
+        'notificationsUri': 'dummy_uri',
+        'token': token,
       });
     });
 
@@ -73,12 +92,15 @@ describe('models.subscription', () => {
   });
 
   describe('update', async () => {
+    let token;
     beforeEach(async () => {
       await resetDB();
+      token = await Subscription.generateToken();
       await Subscription.create({
         hotelAddress: '0xdummy',
         remoteId: 'dummy_remote_id',
         notificationsUri: 'dummy_uri',
+        token,
       });
     });
 
@@ -86,9 +108,10 @@ describe('models.subscription', () => {
       await Subscription.update('0xdummy', { notificationsUri: 'modified' });
       const result = await Subscription.get('0xdummy');
       assert.deepEqual(result, {
-        hotelAddress: '0xdummy',
-        remoteId: 'dummy_remote_id',
-        notificationsUri: 'modified',
+        'hotelAddress': '0xdummy',
+        'remoteId': 'dummy_remote_id',
+        'notificationsUri': 'modified',
+        'token': token,
       });
     });
   });
