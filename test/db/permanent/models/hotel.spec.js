@@ -17,11 +17,12 @@ describe('models.hotel', () => {
         partName: 'description',
         rawData: hotelData.DESCRIPTION,
       });
-      const result = await db.select('address', 'part_name', 'raw_data')
+      const result = await db.select('address', 'part_name', 'raw_data', 'updated_at')
         .from(Hotel.TABLE);
       assert.equal(result[0].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result[0].part_name, 'description');
       assert.deepEqual(JSON.parse(result[0].raw_data), hotelData.DESCRIPTION);
+      assert.property(result[0], 'updated_at');
     });
 
     it('should insert multiple data at once', async () => {
@@ -61,6 +62,7 @@ describe('models.hotel', () => {
           rawData: hotelData.RATE_PLANS,
         },
       ]);
+      const origTimestamps = (await db.select('updated_at').from(Hotel.TABLE));
       await Hotel.upsert([
         {
           address: '0xc2954b66EB27A20c936A3D8F2365FE9349472663',
@@ -68,7 +70,7 @@ describe('models.hotel', () => {
           rawData: { updated: true },
         },
       ]);
-      const result = await db.select('address', 'part_name', 'raw_data')
+      const result = await db.select('address', 'part_name', 'raw_data', 'updated_at')
         .from(Hotel.TABLE);
       assert.equal(result.length, 2);
       assert.equal(result[0].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
@@ -77,6 +79,8 @@ describe('models.hotel', () => {
       assert.equal(result[1].address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
       assert.equal(result[1].part_name, 'ratePlans');
       assert.deepEqual(JSON.parse(result[1].raw_data), hotelData.RATE_PLANS);
+      assert.isAbove(new Date(result[0].updated_at), new Date(origTimestamps[0].updated_at));
+      assert.isAtMost(new Date(result[1].updated_at), new Date(origTimestamps[1].updated_at));
     });
 
     it('should throw on missing required field', async () => {

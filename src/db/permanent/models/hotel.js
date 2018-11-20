@@ -9,7 +9,7 @@ const createTable = async () => {
     table.string('address', 63).notNullable();
     table.enu('part_name', PART_NAMES).notNullable();
     table.json('raw_data').notNullable();
-    table.timestamps(true, true);
+    table.timestamps(true, false); // We do not use the defaults as they behave strangely.
 
     table.index(['address']);
     table.unique(['address', 'part_name']);
@@ -31,10 +31,11 @@ const upsert = async (hotelData) => {
   for (let part of hotelData) {
     const partName = part.partName || null,
       address = part.address || null,
-      rawData = JSON.stringify(part.rawData) || null;
+      rawData = JSON.stringify(part.rawData) || null,
+      now = new Date();
     const modified = await db(TABLE)
       .where({ 'address': address, 'part_name': partName })
-      .update({ 'raw_data': rawData });
+      .update({ 'raw_data': rawData, 'updated_at': now });
     if (modified > 0) {
       continue;
     }
@@ -42,6 +43,8 @@ const upsert = async (hotelData) => {
       'address': address,
       'part_name': partName,
       'raw_data': rawData,
+      'created_at': now,
+      'updated_at': now,
     });
   }
   if (toInsert.length > 0) {
