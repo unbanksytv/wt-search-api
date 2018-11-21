@@ -213,4 +213,61 @@ describe('models.hotel', () => {
       assert.equal(result[0].address, '0xtobekept');
     });
   });
+
+  describe('deleteObsolete', () => {
+    let cutoff;
+    beforeEach(async () => {
+      await Hotel.upsert([
+        {
+          address: '0xobsolete1',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xobsolete1',
+          partName: 'ratePlans',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xobsolete2',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xtobeupdated',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+      ]);
+      cutoff = new Date();
+      await Hotel.upsert([
+        {
+          address: '0xobsolete1',
+          partName: 'description',
+          rawData: { updated: 'dummy' },
+        },
+        {
+          address: '0xtobeupdated',
+          partName: 'description',
+          rawData: { updated: 'dummy' },
+        },
+        {
+          address: '0xnewone',
+          partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+      ]);
+    });
+
+    it('should delete the obsolete hotel parts', async () => {
+      await Hotel.deleteObsolete(cutoff);
+      const addresses = await Hotel.getAddresses(99);
+      assert.deepEqual(addresses.sort(), ['0xnewone', '0xobsolete1', '0xtobeupdated']);
+    });
+
+    it('should return a list of affected hotel addresses', async () => {
+      const addresses = await Hotel.deleteObsolete(cutoff);
+      assert.deepEqual(addresses.sort(), ['0xobsolete1', '0xobsolete2']);
+    });
+  });
 });

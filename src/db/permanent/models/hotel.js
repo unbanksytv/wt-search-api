@@ -102,6 +102,26 @@ const getAddresses = async (limit, startWith) => {
   return (await query.select()).map((item) => item.address);
 };
 
+/**
+ * Delete hotel parts with obsolete data based on the updated_at timestamp.
+ *
+ * Return a list off affected hotel addresses.
+ *
+ * TODO: Make this paginated? Otherwise, the list of addresses might be
+ * very long.
+ *
+ * @param {Date} cutoff
+ * @return {Promise<Array>}
+ */
+const deleteObsolete = async (cutoff) => {
+  // NOTE: There is a potential race condition here but its
+  // impact should be negligible.
+  let addresses = await db.from(TABLE).where('updated_at', '<', cutoff).distinct('address');
+  addresses = addresses.map((x) => x.address);
+  await db.from(TABLE).where('updated_at', '<', cutoff).delete();
+  return addresses;
+};
+
 module.exports = {
   createTable,
   dropTable,
@@ -109,6 +129,7 @@ module.exports = {
   delete: delete_,
   getHotelData,
   getAddresses,
+  deleteObsolete,
   TABLE,
   PART_NAMES,
 };
