@@ -105,17 +105,22 @@ const getAddresses = async (limit, startWith) => {
 /**
  * Delete hotel parts with obsolete data based on the updated_at timestamp.
  *
- * Resolve with the number of deleted parts.
+ * Resolve with the array of affected addresses.
  *
- * @param {String} address
  * @param {Date} cutoff
- * @return {Promise<Integer>}
+ * @param {String} address (optional) limit the deletion to the given address
+ * @return {Promise<Array>}
  */
-const deleteObsoleteParts = async (address, cutoff) => {
-  return db.from(TABLE)
-    .where('address', address)
-    .andWhere('updated_at', '<', cutoff)
-    .delete();
+const deleteObsoleteParts = async (cutoff, address) => {
+  let query = db.from(TABLE).where('updated_at', '<', cutoff);
+  if (address) {
+    query = query.andWhere('address', address);
+  }
+  const addresses = await query.distinct('address');
+  // NOTE: There's a potential race condition here, but its
+  // eventual impact should be negligible.
+  await query.delete();
+  return addresses.map((x) => x.address);
 };
 
 module.exports = {

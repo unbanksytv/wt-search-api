@@ -72,7 +72,8 @@ class Crawler {
   async syncAllHotels () {
     // TODO deal with errored ids - although they shouldn't
     // occur here, because it's contacting only on-chain data
-    const syncPromises = [];
+    const syncPromises = [],
+      syncStarted = new Date();
     try {
       this.config.logger.debug('Fetching hotel list');
       await this.getFetcher().fetchHotelList({
@@ -86,7 +87,9 @@ class Crawler {
           }
         },
       });
-      return Promise.all(syncPromises);
+      await Promise.all(syncPromises);
+      this.config.logger.debug('Deleting obsolete hotels, if any...');
+      await this.deleteObsolete(syncStarted);
     } catch (e) {
       this.logError(e, `Fetching hotel list error: ${e.message}`);
       throw e;
@@ -135,7 +138,8 @@ class Crawler {
         this.config.logger.debug(`No data for ${hotelAddress} available`);
       }
       // After all the updates are done, delete obsolete hotel parts (if any).
-      await HotelModel.deleteObsoleteParts(hotelAddress, syncStarted);
+      this.config.logger.debug(`Deleting obsolete parts of ${hotelAddress}, if any...`);
+      await HotelModel.deleteObsoleteParts(syncStarted, hotelAddress);
       if (this.config.triggerIndexing) {
         // This also takes care of removing indexed data if no longer up-to-date.
         this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
@@ -157,6 +161,15 @@ class Crawler {
     await HotelModel.delete(hotelAddress);
     if (this.config.triggerIndexing) {
       this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
+    }
+  }
+
+  async deleteObsolete (cutoff) {
+    const deletedAddresses = await HotelModel.deleteObsoleteParts(cutoff);
+    if (this.config.triggerIndexing) {
+      for (let hotelAddress of deletedAddresses) {
+        this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
+      }
     }
   }
 }
