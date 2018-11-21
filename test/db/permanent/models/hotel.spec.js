@@ -220,7 +220,7 @@ describe('models.hotel', () => {
     });
   });
 
-  describe('deleteObsolete', () => {
+  describe('deleteObsoleteParts', () => {
     let cutoff;
     beforeEach(async () => {
       await Hotel.upsert([
@@ -237,6 +237,11 @@ describe('models.hotel', () => {
         {
           address: '0xobsolete2',
           partName: 'description',
+          rawData: hotelData.DESCRIPTION,
+        },
+        {
+          address: '0xobsolete2',
+          partName: 'ratePlans',
           rawData: hotelData.DESCRIPTION,
         },
         {
@@ -266,20 +271,24 @@ describe('models.hotel', () => {
     });
 
     it('should delete the obsolete hotel parts', async () => {
-      await Hotel.deleteObsolete(cutoff);
+      await Hotel.deleteObsoleteParts('0xobsolete1', cutoff);
+      await Hotel.deleteObsoleteParts('0xobsolete2', cutoff);
+      await Hotel.deleteObsoleteParts('0xtobeupdated', cutoff);
+      await Hotel.deleteObsoleteParts('0xnewone', cutoff);
       const addresses = await Hotel.getAddresses(99);
       assert.deepEqual(addresses.sort(), ['0xnewone', '0xobsolete1', '0xtobeupdated']);
     });
 
-    it('should return a list of affected hotel addresses', async () => {
-      const addresses = await Hotel.deleteObsolete(cutoff);
-      assert.deepEqual(addresses.sort(), ['0xobsolete1', '0xobsolete2']);
+    it('should return the number of deleted hotel parts', async () => {
+      assert.equal(await Hotel.deleteObsoleteParts('0xobsolete1', cutoff), 1);
+      assert.equal(await Hotel.deleteObsoleteParts('0xobsolete2', cutoff), 2);
+      assert.equal(await Hotel.deleteObsoleteParts('0xtobeupdated', cutoff), 0);
+      assert.equal(await Hotel.deleteObsoleteParts('0xnewone', cutoff), 0);
     });
 
-    it('should limit the deletion to a subset of hotels if requested', async () => {
-      let addresses = await Hotel.deleteObsolete(cutoff, ['0xobsolete1', '0xnewone']);
-      assert.deepEqual(addresses.sort(), ['0xobsolete1']);
-      addresses = await Hotel.getAddresses(99);
+    it('should limit the deletion to the hotel in question', async () => {
+      await Hotel.deleteObsoleteParts('0xobsolete1', cutoff);
+      const addresses = await Hotel.getAddresses(99);
       assert.deepEqual(addresses.sort(), ['0xnewone', '0xobsolete1', '0xobsolete2', '0xtobeupdated']);
     });
   });

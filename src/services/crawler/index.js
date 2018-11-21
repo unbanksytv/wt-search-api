@@ -75,7 +75,6 @@ class Crawler {
     const syncPromises = [];
     try {
       this.config.logger.debug('Fetching hotel list');
-      const syncStarted = new Date();
       await this.getFetcher().fetchHotelList({
         onEveryPage: (hotels) => {
           for (let hotelAddress of hotels.addresses) {
@@ -87,10 +86,7 @@ class Crawler {
           }
         },
       });
-      await Promise.all(syncPromises);
-      // After all the updates are done, delete obsolete hotels
-      // and their parts.
-      return this.deleteObsolete(syncStarted);
+      return Promise.all(syncPromises);
     } catch (e) {
       this.logError(e, `Fetching hotel list error: ${e.message}`);
       throw e;
@@ -103,12 +99,13 @@ class Crawler {
     }
     this.config.logger.debug(`Fetching ${hotelAddress} /meta`);
     try {
-      const indexData = await this._syncHotelPart(hotelAddress, 'meta');
-      const meta = indexData.rawData;
-      const parts = HotelModel.PART_NAMES.filter((p) => {
-        return typeof meta[`${p}Uri`] === 'string';
-      });
-      const hotelPartPromises = [];
+      const syncStarted = new Date(),
+        indexData = await this._syncHotelPart(hotelAddress, 'meta'),
+        meta = indexData.rawData,
+        parts = HotelModel.PART_NAMES.filter((p) => {
+          return typeof meta[`${p}Uri`] === 'string';
+        }),
+        hotelPartPromises = [];
       for (let hotelPartName of parts) {
         hotelPartPromises.push((async () => {
           try {
@@ -134,11 +131,14 @@ class Crawler {
       if (hotelData.length !== 0) {
         this.config.logger.debug(`Saving ${hotelAddress} into database`);
         await HotelModel.upsert(hotelData);
-        if (this.config.triggerIndexing) {
-          this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
-        }
       } else {
         this.config.logger.debug(`No data for ${hotelAddress} available`);
+      }
+      // After all the updates are done, delete obsolete hotel parts (if any).
+      await HotelModel.deleteObsoleteParts(hotelAddress, syncStarted);
+      if (this.config.triggerIndexing) {
+        // This also takes care of removing indexed data if no longer up-to-date.
+        this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
       }
       if (this.config.subscribeForNotifications) {
         await this._handleSubscription(hotelAddress, hotelData);
@@ -156,13 +156,6 @@ class Crawler {
     this.config.logger.debug(`Deleting hotel ${hotelAddress} locally.`);
     await HotelModel.delete(hotelAddress);
     if (this.config.triggerIndexing) {
-      this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
-    }
-  }
-
-  async deleteObsolete (cutoff) {
-    const addresses = await HotelModel.deleteObsolete(cutoff);
-    for (let hotelAddress of addresses) {
       this.queue.enqueue({ type: 'indexHotel', payload: { hotelAddress } });
     }
   }
