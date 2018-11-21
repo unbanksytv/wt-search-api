@@ -111,14 +111,21 @@ const getAddresses = async (limit, startWith) => {
  * very long.
  *
  * @param {Date} cutoff
+ * @param {Array} limitTo (optional) array of hotel addresses
  * @return {Promise<Array>}
  */
-const deleteObsolete = async (cutoff) => {
+const deleteObsolete = async (cutoff, limitTo) => {
+  let query = db.from(TABLE);
+  if (limitTo) {
+    query = query.whereIn('address', limitTo).andWhere('updated_at', '<', cutoff);
+  } else {
+    query = query.where('updated_at', '<', cutoff);
+  }
+  let addresses = await query.distinct('address');
+  addresses = addresses.map((x) => x.address);
   // NOTE: There is a potential race condition here but its
   // impact should be negligible.
-  let addresses = await db.from(TABLE).where('updated_at', '<', cutoff).distinct('address');
-  addresses = addresses.map((x) => x.address);
-  await db.from(TABLE).where('updated_at', '<', cutoff).delete();
+  await query.delete();
   return addresses;
 };
 

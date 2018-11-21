@@ -275,5 +275,12 @@ describe('models.hotel', () => {
       const addresses = await Hotel.deleteObsolete(cutoff);
       assert.deepEqual(addresses.sort(), ['0xobsolete1', '0xobsolete2']);
     });
+
+    it('should limit the deletion to a subset of hotels if requested', async () => {
+      let addresses = await Hotel.deleteObsolete(cutoff, ['0xobsolete1', '0xnewone']);
+      assert.deepEqual(addresses.sort(), ['0xobsolete1']);
+      addresses = await Hotel.getAddresses(99);
+      assert.deepEqual(addresses.sort(), ['0xnewone', '0xobsolete1', '0xobsolete2', '0xtobeupdated']);
+    });
   });
 });
