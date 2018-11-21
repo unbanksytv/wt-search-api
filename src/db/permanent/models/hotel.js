@@ -12,6 +12,7 @@ const createTable = async () => {
     table.timestamps(true, false); // We do not use the defaults as they behave strangely.
 
     table.index(['address']);
+    table.index(['updated_at', 'address']);
     table.unique(['address', 'part_name']);
   });
 };
