@@ -14,7 +14,7 @@ const INDEXERS = [
  */
 class Indexer {
   /**
-  * Index a single hotel.
+  * Index / deindex a single hotel.
   *
   * @param {Object} hotel as returned from Hotel.getHotelData.
   * @return {Promise<void>}
@@ -23,19 +23,6 @@ class Indexer {
   async indexHotel (hotel) {
     for (let indexer of INDEXERS) {
       await indexer.indexHotel(hotel);
-    }
-  }
-
-  /**
-  * Deindex a single hotel.
-  *
-  * @param {String} hotelAddress
-  * @return {Promise<void>}
-  *
-  */
-  async deindexHotel (hotelAddress) {
-    for (let indexer of INDEXERS) {
-      await indexer.deindexHotel(hotelAddress);
     }
   }
 

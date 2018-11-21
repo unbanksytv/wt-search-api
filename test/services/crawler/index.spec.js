@@ -42,13 +42,13 @@ describe('services.crawler.index', () => {
   });
 
   describe('syncAllHotels', () => {
-    let crawler,
-      syncHotelStub, fetchHotelListStub;
+    let crawler, syncHotelStub, fetchHotelListStub, deleteObsoleteStub;
 
     beforeEach(async () => {
       await resetDB();
       crawler = new Crawler({ logger: logger });
       syncHotelStub = sinon.stub().resolves([0]);
+      deleteObsoleteStub = sinon.stub().resolves();
       fetchHotelListStub = sinon.stub().callsFake((opts) => {
         opts.onEveryPage && opts.onEveryPage({ addresses: [1, 2, 3] });
         return Promise.resolve({ addresses: [1, 2, 3] });
@@ -57,22 +57,23 @@ describe('services.crawler.index', () => {
         fetchHotelList: fetchHotelListStub,
       });
       crawler.syncHotel = syncHotelStub;
+      crawler.deleteObsolete = deleteObsoleteStub;
     });
 
     it('should initiate sync for all hotels', async () => {
-      const result = await crawler.syncAllHotels();
+      await crawler.syncAllHotels();
       assert.equal(fetchHotelListStub.callCount, 1);
       assert.equal(syncHotelStub.callCount, 3);
-      assert.equal(result.length, 3);
+      assert.equal(deleteObsoleteStub.callCount, 1);
     });
 
     it('should not panic when individual hotels cannot be synced', async () => {
       syncHotelStub = sinon.stub().rejects(new Error('Cannot sync hotel'));
       crawler.syncHotel = syncHotelStub;
-      const result = await crawler.syncAllHotels();
+      await crawler.syncAllHotels();
       assert.equal(fetchHotelListStub.callCount, 1);
       assert.equal(syncHotelStub.callCount, 3);
-      assert.equal(result.length, 3);
+      assert.equal(deleteObsoleteStub.callCount, 1);
     });
   });
 

@@ -50,6 +50,18 @@ describe('indices.by-location', () => {
       const data = await db(Location.TABLE).select('hotel_address', 'lat', 'lng');
       assert.deepEqual(data, []);
     });
+
+    it('should remove the previously created location if no longer applicable', async () => {
+      await byLocation.indexHotel({
+        address: '0xdummy',
+        data: { description: { location: { lat: 10, lng: 10 } } },
+      });
+      let records = await db(Location.TABLE).select('hotel_address');
+      assert.equal(records.length, 1);
+      await byLocation.indexHotel({ address: '0xdummy', data: {} });
+      records = await db(Location.TABLE).select('hotel_address');
+      assert.equal(records.length, 0);
+    });
   });
 
   describe('_convertKilometersToDegrees', () => {
@@ -187,24 +199,6 @@ describe('indices.by-location', () => {
     it('should return undefined if no sorting is specified', async () => {
       const query = {};
       assert.equal(byLocation.getSorting(query), undefined);
-    });
-  });
-
-  describe('deindexHotel', () => {
-    beforeEach(async () => {
-      await resetDB();
-    });
-
-    it('should remove the previously created location', async () => {
-      await byLocation.indexHotel({
-        address: '0xdummy',
-        data: { description: { location: { lat: 10, lng: 10 } } },
-      });
-      let records = await db(Location.TABLE).select('hotel_address');
-      assert.equal(records.length, 1);
-      await byLocation.deindexHotel('0xdummy');
-      records = await db(Location.TABLE).select('hotel_address');
-      assert.equal(records.length, 0);
     });
   });
 });

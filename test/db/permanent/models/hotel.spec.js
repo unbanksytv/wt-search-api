@@ -186,6 +186,12 @@ describe('models.hotel', () => {
       assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
       assert.isUndefined(result.data.meta);
     });
+
+    it('should return an empty object when no data is present', async () => {
+      const result = await Hotel.getHotelData('0xnonexisting');
+      assert.equal(result.address, '0xnonexisting');
+      assert.deepEqual(result.data, {});
+    });
   });
 
   describe('delete', () => {
