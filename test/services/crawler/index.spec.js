@@ -42,13 +42,13 @@ describe('services.crawler.index', () => {
   });
 
   describe('syncAllHotels', () => {
-    let crawler,
-      syncHotelStub, fetchHotelListStub;
+    let crawler, syncHotelStub, fetchHotelListStub, deleteObsoleteStub;
 
     beforeEach(async () => {
       await resetDB();
       crawler = new Crawler({ logger: logger });
       syncHotelStub = sinon.stub().resolves([0]);
+      deleteObsoleteStub = sinon.stub().resolves();
       fetchHotelListStub = sinon.stub().callsFake((opts) => {
         opts.onEveryPage && opts.onEveryPage({ addresses: [1, 2, 3] });
         return Promise.resolve({ addresses: [1, 2, 3] });
@@ -57,22 +57,23 @@ describe('services.crawler.index', () => {
         fetchHotelList: fetchHotelListStub,
       });
       crawler.syncHotel = syncHotelStub;
+      crawler.deleteObsolete = deleteObsoleteStub;
     });
 
     it('should initiate sync for all hotels', async () => {
-      const result = await crawler.syncAllHotels();
+      await crawler.syncAllHotels();
       assert.equal(fetchHotelListStub.callCount, 1);
       assert.equal(syncHotelStub.callCount, 3);
-      assert.equal(result.length, 3);
+      assert.equal(deleteObsoleteStub.callCount, 1);
     });
 
     it('should not panic when individual hotels cannot be synced', async () => {
       syncHotelStub = sinon.stub().rejects(new Error('Cannot sync hotel'));
       crawler.syncHotel = syncHotelStub;
-      const result = await crawler.syncAllHotels();
+      await crawler.syncAllHotels();
       assert.equal(fetchHotelListStub.callCount, 1);
       assert.equal(syncHotelStub.callCount, 3);
-      assert.equal(result.length, 3);
+      assert.equal(deleteObsoleteStub.callCount, 1);
     });
   });
 
@@ -140,6 +141,27 @@ describe('services.crawler.index', () => {
       assert.equal(result[3].address, '0xdummy');
       assert.equal(result[3].part_name, 'availability');
       upsertSpy.restore();
+    });
+
+    it('delete obsolete parts', async () => {
+      await crawler.syncHotel('0xdummy');
+      let result = await db.select('part_name').from(HotelModel.TABLE);
+      assert.equal(result.length, 4);
+      crawler.getFetcher = sinon.stub().returns({
+        fetchDescription: fetchDescriptionStub,
+        fetchRatePlans: fetchRatePlansStub,
+        fetchAvailability: fetchAvailabilityStub,
+        fetchMeta: sinon.stub().resolves({
+          address: '0xdummy',
+          dataFormatVersion: '0.1.0',
+          dataUri: 'https://example.com/data',
+          descriptionUri: 'https://example.com/description',
+        }),
+      });
+      // Sync again; this time, ratePlans and availability disappeared from upstrem.
+      await crawler.syncHotel('0xdummy');
+      result = await db.select('part_name').from(HotelModel.TABLE);
+      assert.deepEqual(result.map((x) => x.part_name).sort(), ['description', 'meta']);
     });
 
     it('should not panic on fetch error of data document', async () => {
