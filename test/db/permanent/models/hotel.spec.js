@@ -177,16 +177,6 @@ describe('models.hotel', () => {
       assert.notProperty(result.data, 'availability');
     });
 
-    it('should select only the latest part of the same type', async () => {
-      const result = await Hotel.getHotelData(hotelId);
-      assert.equal(result.address, hotelId);
-      assert.isDefined(result.data);
-      assert.deepEqual(result.data.description, hotelData.DESCRIPTION);
-      assert.deepEqual(result.data.ratePlans, hotelData.RATE_PLANS);
-      assert.deepEqual(result.data.availability, hotelData.AVAILABILITY);
-      assert.isUndefined(result.data.meta);
-    });
-
     it('should return an empty object when no data is present', async () => {
       const result = await Hotel.getHotelData('0xnonexisting');
       assert.equal(result.address, '0xnonexisting');
