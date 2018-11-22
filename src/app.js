@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 
 // Hotels
 app.get('/hotels', hotels.getList);
-app.post('/notifications', notifications.accept);
+app.post('/notifications/:subscription_token', notifications.accept);
 
 // 404 handler
 app.use('*', (req, res, next) => {
