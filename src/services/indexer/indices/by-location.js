@@ -133,7 +133,7 @@ function getSorting (query) {
 }
 
 /**
-* Index a single hotel.
+* Index / deindex a single hotel (based on its current data).
 *
 * @param {Object} hotel as returned from Hotel.getHotelData.
 * @return {Promise<void>}
@@ -143,18 +143,9 @@ async function indexHotel (hotel) {
   const coords = hotel.data.description && hotel.data.description.location;
   if (coords) {
     await Location.upsert(hotel.address, coords.latitude, coords.longitude);
+  } else {
+    await Location.delete(hotel.address);
   }
-}
-
-/**
-* Deindex a single hotel.
-*
-* @param {String} hotelAddress
-* @return {Promise<void>}
-*
-*/
-async function deindexHotel (hotelAddress) {
-  await Location.delete(hotelAddress);
 }
 
 module.exports = {
@@ -164,5 +155,4 @@ module.exports = {
   getFiltering,
   getSorting,
   indexHotel,
-  deindexHotel,
 };

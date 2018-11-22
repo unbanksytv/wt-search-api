@@ -9,9 +9,10 @@ const createTable = async () => {
     table.string('address', 63).notNullable();
     table.enu('part_name', PART_NAMES).notNullable();
     table.json('raw_data').notNullable();
-    table.timestamps(true, true);
+    table.timestamps(true, false); // We do not use the defaults as they behave strangely.
 
     table.index(['address']);
+    table.index(['updated_at', 'address']);
     table.unique(['address', 'part_name']);
   });
 };
@@ -31,10 +32,11 @@ const upsert = async (hotelData) => {
   for (let part of hotelData) {
     const partName = part.partName || null,
       address = part.address || null,
-      rawData = JSON.stringify(part.rawData) || null;
+      rawData = JSON.stringify(part.rawData) || null,
+      now = new Date();
     const modified = await db(TABLE)
       .where({ 'address': address, 'part_name': partName })
-      .update({ 'raw_data': rawData });
+      .update({ 'raw_data': rawData, 'updated_at': now });
     if (modified > 0) {
       continue;
     }
@@ -42,6 +44,8 @@ const upsert = async (hotelData) => {
       'address': address,
       'part_name': partName,
       'raw_data': rawData,
+      'created_at': now,
+      'updated_at': now,
     });
   }
   if (toInsert.length > 0) {
@@ -99,6 +103,27 @@ const getAddresses = async (limit, startWith) => {
   return (await query.select()).map((item) => item.address);
 };
 
+/**
+ * Delete hotel parts with obsolete data based on the updated_at timestamp.
+ *
+ * Resolve with the array of affected addresses.
+ *
+ * @param {Date} cutoff
+ * @param {String} address (optional) limit the deletion to the given address
+ * @return {Promise<Array>}
+ */
+const deleteObsoleteParts = async (cutoff, address) => {
+  let query = db.from(TABLE).where('updated_at', '<', cutoff);
+  if (address) {
+    query = query.andWhere('address', address);
+  }
+  const addresses = await query.distinct('address');
+  // NOTE: There's a potential race condition here, but its
+  // eventual impact should be negligible.
+  await query.delete();
+  return addresses.map((x) => x.address);
+};
+
 module.exports = {
   createTable,
   dropTable,
@@ -106,6 +131,7 @@ module.exports = {
   delete: delete_,
   getHotelData,
   getAddresses,
+  deleteObsoleteParts,
   TABLE,
   PART_NAMES,
 };

@@ -14,7 +14,7 @@ class RemoteError extends Error {};
  * @param {Function} requestLib optional
  * @return {Promise<String>}
  */
-async function _sendSubscriptionRequest (notificationsUri, hotelAddress, requestLib) {
+async function _sendSubscriptionRequest (notificationsUri, hotelAddress, token, requestLib) {
   requestLib = requestLib || request;
   let response;
   const wtIndexAddress = await wtIndexGetter.get(requestLib);
@@ -26,7 +26,7 @@ async function _sendSubscriptionRequest (notificationsUri, hotelAddress, request
         wtIndex: wtIndexAddress,
         resourceType: 'hotel',
         resourceAddress: hotelAddress,
-        url: (new URL('/notifications', baseUrl)).toString(),
+        url: (new URL(`/notifications/${token}`, baseUrl)).toString(),
       },
       json: true,
       resolveWithFullResponse: true,
@@ -56,16 +56,17 @@ async function subscribeIfNeeded (notificationsUri, hotelAddress, requestLib) {
   if (subscription && subscription.notificationsUri === notificationsUri) {
     return; // Nothing to do.
   }
-  const remoteId = await _sendSubscriptionRequest(notificationsUri, hotelAddress, requestLib);
+  const token = await Subscription.generateToken(),
+    remoteId = await _sendSubscriptionRequest(notificationsUri, hotelAddress, token, requestLib);
   logger.debug(`Subscribing for update notifications for ${hotelAddress} at ${notificationsUri}`);
   if (subscription) {
     // Notifications URI has changed. We don't need to
     // unsubscribe from the previous notificationsUri because,
     // presumably, updates for the given hotel will not be
     // broadcast through it anyway.
-    return Subscription.update(hotelAddress, { notificationsUri, remoteId });
+    return Subscription.update(hotelAddress, { notificationsUri, remoteId, token });
   }
-  return Subscription.create({ hotelAddress, remoteId, notificationsUri });
+  return Subscription.create({ hotelAddress, remoteId, notificationsUri, token });
 }
 
 module.exports = {
