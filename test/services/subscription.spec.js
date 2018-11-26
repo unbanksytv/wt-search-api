@@ -47,9 +47,9 @@ describe('subscription', function () {
       assert.equal(requestMock.callCount, 2); // One call for wt index, another for subscription.
       assert.equal(requestMock.args[1][0].uri, 'http://dummy.uri/subscriptions');
       assert.property(requestMock.args[1][0], 'body');
-      assert.property(requestMock.args[1][0].body, 'wtIndex', '0xdummyIndex');
-      assert.property(requestMock.args[1][0].body, 'resourceType', 'hotel');
-      assert.property(requestMock.args[1][0].body, 'resourceAddress', '0xdummy');
+      assert.propertyVal(requestMock.args[1][0].body, 'wtIndex', '0xdummyIndex');
+      assert.propertyVal(requestMock.args[1][0].body, 'resourceType', 'hotel');
+      assert.propertyVal(requestMock.args[1][0].body, 'resourceAddress', '0xdummy');
       assert.match(requestMock.args[1][0].body.url, new RegExp(`${baseUrl}/notifications`));
       const token = requestMock.args[1][0].body.url.match(/\/notifications\/([^/]+)/)[1];
       const sub = await Subscription.get('0xdummy');
