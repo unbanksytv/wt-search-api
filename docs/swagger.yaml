@@ -36,7 +36,7 @@ paths:
       parameters:
         - name: location
           in: query
-          description: Filter by distance to the given location(s). Maximum allowed distance in the filter is 200 km.
+          description: Filter by distance (in kilometers) to the given location(s). Maximum allowed distance in the filter is 200 km.
           required: false
           schema:
             type: array
@@ -49,7 +49,7 @@ paths:
             value: 50.08,14.44:20
         - name: sortByLocation
           in: query
-          description: Sort by distance from given point.
+          description: Sort by distance (in kilometers) from given point.
           required: false
           schema:
             type: string
