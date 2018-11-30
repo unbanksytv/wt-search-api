@@ -83,12 +83,17 @@ describe('controllers - hotels', function () {
         .end(async (err, res) => {
           if (err) return done(err);
           try {
-            assert.deepEqual(res.body, {
-              items: [
-                { id: '0xdummy2', name: 'dummy2' },
-                { id: '0xdummy1', name: 'dummy1' },
-              ],
-            });
+            assert.property(res.body, 'sortingScores');
+            assert.equal(res.body.sortingScores.length, 2);
+            assert.property(res.body.sortingScores[0], 'id');
+            assert.property(res.body.sortingScores[0], 'score');
+            assert.property(res.body.sortingScores[0].score, 'name');
+            assert.property(res.body.sortingScores[0].score, 'value');
+            assert.property(res.body, 'items');
+            assert.deepEqual(res.body.items, [
+              { id: '0xdummy2', name: 'dummy2' },
+              { id: '0xdummy1', name: 'dummy1' },
+            ]);
             done();
           } catch (err) {
             done(err);

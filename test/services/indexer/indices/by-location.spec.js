@@ -144,6 +144,29 @@ describe('indices.by-location', () => {
         '0xvladivostok',
       ]);
     });
+
+    it('should allow to compute an approximate distance in kilometers', async () => {
+      const kladno = {
+        lat: 50.1426281,
+        lng: 14.1131347,
+      };
+      await Location.upsert('0xpraha', 50.0682006, 14.4180053);
+      await Location.upsert('0xslany', 50.2317808, 14.0844553);
+      await Location.upsert('0xlouny', 50.3536783, 13.8087147);
+
+      // Sort by distance from Kladno.
+      const sorting = byLocation._getSorting(kladno.lat, kladno.lng),
+        results = await db(sorting.table).select(sorting.select).orderBy(sorting.columnName),
+        expectedDistances = [ // Found using online maps.
+          10.14, // Slany
+          23.26, // Praha
+          31.93, // Louny
+        ];
+      for (let i = 0; i < expectedDistances.length; i++) {
+        let delta = sorting.computeScore(results[i][sorting.columnName]) - expectedDistances[i];
+        assert.isBelow(Math.abs(delta), 0.2); // Accuracy to 200 meters.
+      }
+    });
   });
 
   describe('getFiltering', () => {
@@ -184,9 +207,11 @@ describe('indices.by-location', () => {
           sorting: { type: 'distance', data: { lat: 10, lng: 10 } },
         },
         sorting = byLocation.getSorting(query);
+      assert.property(sorting, 'name');
       assert.property(sorting, 'table');
       assert.property(sorting, 'columnName');
       assert.property(sorting, 'select');
+      assert.property(sorting, 'computeScore');
     });
 
     it('should return undefined if the sorting type is not "location"', async () => {
