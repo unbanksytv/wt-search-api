@@ -41,9 +41,18 @@ module.exports.getList = async (req, res, next) => {
       filters: queryParser.getFilters(req.query),
       sorting: queryParser.getSort(req.query),
     };
-    let hotelAddresses;
+    let hotelAddresses, scores;
     if (query.filters || query.sorting) {
-      hotelAddresses = await indexer.lookup(query, limit + 1, startWith);
+      const lookup = await indexer.lookup(query, limit + 1, startWith);
+      hotelAddresses = lookup.map((x) => x.address);
+      if (query.sorting) {
+        scores = lookup.map((x) => {
+          return {
+            id: x.address,
+            score: x.score,
+          };
+        });
+      }
     } else {
       hotelAddresses = await HotelModel.getAddresses(limit + 1, startWith);
     }
@@ -52,6 +61,9 @@ module.exports.getList = async (req, res, next) => {
 
     if (hotelAddresses[limit]) {
       result.next = `${baseUrl}${req.path}?limit=${limit}&startWith=${hotelAddresses[limit]}`;
+    }
+    if (scores) {
+      result.sortingScores = scores;
     }
     res.json(result);
   } catch (err) {

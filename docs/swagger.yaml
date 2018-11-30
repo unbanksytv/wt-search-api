@@ -69,6 +69,29 @@ paths:
                     description: List of resolved hotels.
                     items:
                       $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/3e9f47badeb20d4cf1082e787952ccc4da714e16/docs/swagger.yaml#/components/schemas/HotelListItem
+                  sortingScores:
+                    type: array
+                    description: List of item scores used for sorting (if applicable).
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - score
+                      properties:
+                        id:
+                          $ref: https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/EthereumAddressType
+                        score:
+                          type: object
+                          required:
+                            - name
+                            - value
+                          properties:
+                            name:
+                              description: Name of the metric that was used for sorting.
+                              type: string
+                            value:
+                              description: Value of the sorting metric.
+                              type: number
                   next:
                     description: >-
                       Uri to next page of records. When there's no next page,
