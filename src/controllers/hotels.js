@@ -59,11 +59,32 @@ module.exports.getList = async (req, res, next) => {
     const hotels = await _augmentWithData(hotelAddresses.slice(0, limit), req.query),
       result = { items: hotels };
 
-    if (hotelAddresses[limit]) {
-      result.next = `${baseUrl}${req.path}?limit=${limit}&startWith=${hotelAddresses[limit]}`;
-    }
     if (scores) {
       result.sortingScores = scores;
+    }
+
+    if (hotelAddresses[limit]) {
+      let transferredQueryParams = Object.keys(queryParser.FILTERS)
+        .concat(Object.keys(queryParser.SORTS))
+        .map((q) => {
+          if (req.query[q]) {
+            return {
+              name: q,
+              value: req.query[q],
+            };
+          }
+        }).reduce((acc, c) => {
+          if (c) {
+            acc.push(`${c.name}=${c.value}`);
+          }
+          return acc;
+        }, [])
+        .join('&');
+      if (transferredQueryParams) {
+        transferredQueryParams += '&';
+      }
+
+      result.next = `${baseUrl}${req.path}?${transferredQueryParams}limit=${limit}&startWith=${hotelAddresses[limit]}`;
     }
     res.json(result);
   } catch (err) {
