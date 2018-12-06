@@ -84,7 +84,7 @@ function _getSorting (lat, lng) {
   const scale = Math.cos(_toRadians(Math.abs(lat))),
     scaleSquared = Math.pow(scale, 2);
   return {
-    name: 'byLocation',
+    name: 'distance',
     table: Location.TABLE,
     columnName: 'location_distance',
     // Order by the euclidean distance between two points (we

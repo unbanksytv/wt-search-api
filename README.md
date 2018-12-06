@@ -59,7 +59,7 @@ The following command will get you the 3 closest hotels to 46.770066, 23.600819
 sorted by distance from this point and no further than 30 kilometers.
 
 ```bash
-curl -X GET "https://playground-search-api.windingtree.com/hotels?location=46.770066,23.600819:30&sortByLocation=46.770066,23.600819&limit=3" -H "accept: application/json"
+curl -X GET "https://playground-search-api.windingtree.com/hotels?location=46.770066,23.600819:30&sortByDistance=46.770066,23.600819&limit=3" -H "accept: application/json"
 ```
 
 You are not required to use both filters and sorts simultaneously, you can pick one or

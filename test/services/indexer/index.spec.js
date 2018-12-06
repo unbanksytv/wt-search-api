@@ -40,7 +40,7 @@ describe('services.indexer.index', () => {
         addresses = await indexer._getHotelAddresses(99, undefined, undefined, sorting),
         scores = addresses.map((x) => x.score);
       for (let i = 0; i < scores.length; i++) {
-        assert.propertyVal(scores[i], 'name', 'byLocation');
+        assert.propertyVal(scores[i], 'name', 'distance');
         assert.isOk(scores[i].value);
         if (i > 0) {
           assert.isAtLeast(scores[i].value, scores[i - 1].value);
@@ -65,7 +65,7 @@ describe('services.indexer.index', () => {
         addresses = await indexer._getHotelAddresses(99, undefined, [filter], sorting);
       assert.deepEqual(addresses.map((x) => x.address), ['0xdummy2', '0xdummy1']);
       assert.property(addresses[0], 'score');
-      assert.propertyVal(addresses[0].score, 'name', 'byLocation');
+      assert.propertyVal(addresses[0].score, 'name', 'distance');
       assert.property(addresses[0].score, 'value');
     });
 
@@ -93,7 +93,7 @@ describe('services.indexer.index', () => {
         addresses = await indexer.lookup(query, 100);
       assert.deepEqual(addresses.map((x) => x.address), ['0xdummy2', '0xdummy1']);
       assert.property(addresses[0], 'score');
-      assert.propertyVal(addresses[0].score, 'name', 'byLocation');
+      assert.propertyVal(addresses[0].score, 'name', 'distance');
       assert.property(addresses[0].score, 'value');
     });
 
@@ -113,7 +113,7 @@ describe('services.indexer.index', () => {
         addresses = await indexer.lookup(query, 2, '0xdummy2');
       assert.deepEqual(addresses.map((x) => x.address), ['0xdummy2', '0xdummy1']);
       assert.property(addresses[0], 'score');
-      assert.propertyVal(addresses[0].score, 'name', 'byLocation');
+      assert.propertyVal(addresses[0].score, 'name', 'distance');
       assert.property(addresses[0].score, 'value');
     });
   });

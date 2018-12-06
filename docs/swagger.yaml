@@ -47,7 +47,7 @@ paths:
           example:
             summary: Only include hotels up to 20 kilometers away from the point denoted by the (50.08, 14.44) lat / long pair.
             value: 50.08,14.44:20
-        - name: sortByLocation
+        - name: sortByDistance
           in: query
           description: Sort by distance (in kilometers) from given point.
           required: false
