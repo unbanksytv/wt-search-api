@@ -36,26 +36,22 @@ paths:
       parameters:
         - name: location
           in: query
-          description: Filter by distance (in kilometers) to the given location(s). Maximum allowed distance in the filter is 200 km.
+          description: Filter by distance (in kilometers) to the given location. Maximum allowed distance in the filter is 200 km. Format is "lat,long:distance" and you can specify multiple areas as multiple query parameters with this name.
           required: false
           schema:
             type: array
             items:
               type: string
-          style: form
-          explode: true
-          example:
-            summary: Only include hotels up to 20 kilometers away from the point denoted by the (50.08, 14.44) lat / long pair.
-            value: 50.08,14.44:20
+              pattern: '^[\d.]+,[\d.]+:[\d.]+$'
+          example: 50.08,14.44:20
         - name: sortByDistance
           in: query
-          description: Sort by distance (in kilometers) from given point.
+          description: Sort by distance (in kilometers) from given point (lat, long).
           required: false
           schema:
             type: string
-          example:
-            summary: Sort by distance from the point denoted by the (50.08, 14.44) lat / long pair.
-            value: 50.08,14.44
+            pattern: '^[\d.]+,[\d.]+$'
+          example: 50.08,14.44
       responses:
         '200':
           description: A list of hotels matching the input criteria.
