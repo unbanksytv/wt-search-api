@@ -90,7 +90,7 @@ describe('services.crawler.index', () => {
       fetchAvailabilityStub = sinon.stub().resolves(hotelData.AVAILABILITY);
       fetchMetaStub = sinon.stub().resolves({
         address: '0xdummy',
-        dataFormatVersion: '0.1.0',
+        dataFormatVersion: '0.2.0',
         dataUri: 'https://example.com/data',
         descriptionUri: 'https://example.com/description',
         ratePlansUri: 'https://example.com/rate-plans',
@@ -153,7 +153,7 @@ describe('services.crawler.index', () => {
         fetchAvailability: fetchAvailabilityStub,
         fetchMeta: sinon.stub().resolves({
           address: '0xdummy',
-          dataFormatVersion: '0.1.0',
+          dataFormatVersion: '0.2.0',
           dataUri: 'https://example.com/data',
           descriptionUri: 'https://example.com/description',
         }),
