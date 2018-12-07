@@ -103,7 +103,16 @@ class Indexer {
     }
 
     const data = await query.select(`${firstTable}.hotel_address`);
-    return data.map((item) => item.hotel_address);
+    return data.map((item) => {
+      const x = { address: item.hotel_address };
+      if (sorting) {
+        x.score = {
+          name: sorting.name,
+          value: sorting.computeScore(item[sorting.columnName]),
+        };
+      }
+      return x;
+    });
   }
 
   /**

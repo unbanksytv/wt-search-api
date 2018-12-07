@@ -1,8 +1,71 @@
-# wt-search-api
-
 [![Greenkeeper badge](https://badges.greenkeeper.io/windingtree/wt-search-api.svg)](https://greenkeeper.io/)
+# WT Search API
+
+API written in nodejs to fetch information from the Winding Tree platform.
 
 Work in progress. Discussion on https://groups.google.com/forum/#!topic/windingtree/J_6aRddPVWY
+
+## Requirements
+- Nodejs >=10
+
+### Getting stared
+In order to install and run tests, we must:
+```
+git clone git@github.com:windingtree/wt-read-api.git
+nvm install
+npm install
+npm test
+```
+
+### Running dev mode
+With all the dependencies installed, you can start the dev server.
+
+First step is to initialize the SQLite database used to store your data.
+If you want to use a different database, feel free to change the connection
+settings in the appropriate configuration file in `src/config/`.
+```bash
+npm run createdb-dev
+```
+
+If you'd like to start fresh later, just delete the `.dev.sqlite` file.
+
+Now we can run our dev server.
+```bash
+npm run dev
+```
+By default, this will try to connect to an instance of [wt-read-api](https://github.com/windingtree/wt-read-api)
+running locally on `http://localhost:3000` and index the hotels from there.
+You can override the default in an appropriate config file in `src/config`.
+
+Right after you start your node, it will try to sync and index all of the
+data immediately.
+
+### Running node against a live environment
+
+- For our deployment on https://playground-api.windingtree.com, we use a Docker image.
+- You can use it in your local environment by running the following commands:
+```sh
+$ docker build --build-arg WT_CONFIG=playground -t windingtree/wt-search-api .
+$ docker run -p 8080:1918 -e WT_CONFIG=playground -e WT_READ_API_URL=https://playground-api.windingtree.com -e WT_BASE_API_URL=http://localhost:8080 windingtree/wt-search-api
+```
+- After that you can access the wt-search-api on local port `8080`
+- This deployment is using a Ropsten configuration that can be found in `src/config/playground.js`
+
+## Examples
+
+### Search and sort by location
+
+The following command will get you the 3 closest hotels to 46.770066, 23.600819
+sorted by distance from this point and no further than 30 kilometers.
+
+```bash
+curl -X GET "https://playground-search-api.windingtree.com/hotels?location=46.770066,23.600819:30&sortByDistance=46.770066,23.600819&limit=3" -H "accept: application/json"
+```
+
+You are not required to use both filters and sorts simultaneously, you can pick one or
+the other or combine them.
+
+## Proposed architecture
 
 ![Proposed architecture](https://github.com/windingtree/wt-search-api/raw/master/docs/wt-search-api.png "Proposed architecture")
 

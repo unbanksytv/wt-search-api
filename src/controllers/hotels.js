@@ -41,17 +41,50 @@ module.exports.getList = async (req, res, next) => {
       filters: queryParser.getFilters(req.query),
       sorting: queryParser.getSort(req.query),
     };
-    let hotelAddresses;
+    let hotelAddresses, scores;
     if (query.filters || query.sorting) {
-      hotelAddresses = await indexer.lookup(query, limit + 1, startWith);
+      const lookup = await indexer.lookup(query, limit + 1, startWith);
+      hotelAddresses = lookup.map((x) => x.address);
+      if (query.sorting) {
+        scores = lookup.map((x) => {
+          return {
+            id: x.address,
+            score: x.score,
+          };
+        });
+      }
     } else {
       hotelAddresses = await HotelModel.getAddresses(limit + 1, startWith);
     }
     const hotels = await _augmentWithData(hotelAddresses.slice(0, limit), req.query),
       result = { items: hotels };
 
+    if (scores) {
+      result.sortingScores = scores;
+    }
+
     if (hotelAddresses[limit]) {
-      result.next = `${baseUrl}${req.path}?limit=${limit}&startWith=${hotelAddresses[limit]}`;
+      let transferredQueryParams = Object.keys(queryParser.FILTERS)
+        .concat(Object.keys(queryParser.SORTS))
+        .map((q) => {
+          if (req.query[q]) {
+            return {
+              name: q,
+              value: req.query[q],
+            };
+          }
+        }).reduce((acc, c) => {
+          if (c) {
+            acc.push(`${c.name}=${c.value}`);
+          }
+          return acc;
+        }, [])
+        .join('&');
+      if (transferredQueryParams) {
+        transferredQueryParams += '&';
+      }
+
+      result.next = `${baseUrl}${req.path}?${transferredQueryParams}limit=${limit}&startWith=${hotelAddresses[limit]}`;
     }
     res.json(result);
   } catch (err) {

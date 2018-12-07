@@ -5,6 +5,9 @@ function _toRadians (degrees) {
   return degrees * Math.PI / 180;
 }
 
+const LATITUDE_DEGREE_LENGTH = 111; // Approximately, in kilometers.
+const LONGITUDE_DEGREE_LENGTH_EQUATOR = 111.321;
+
 /**
  * Approximately compute how many degrees in each direction does the
  * given distance go.
@@ -15,8 +18,6 @@ function _toRadians (degrees) {
  * @return {Object}
  *
  */
-const LATITUDE_DEGREE_LENGTH = 111; // Approximately, in kilometers.
-const LONGITUDE_DEGREE_LENGTH_EQUATOR = 111.321;
 function _convertKilometersToDegrees (lat, lng, distance) {
   // We are invariant wrt. hemispheres.
   lat = Math.abs(lat);
@@ -83,6 +84,7 @@ function _getSorting (lat, lng) {
   const scale = Math.cos(_toRadians(Math.abs(lat))),
     scaleSquared = Math.pow(scale, 2);
   return {
+    name: 'distance',
     table: Location.TABLE,
     columnName: 'location_distance',
     // Order by the euclidean distance between two points (we
@@ -91,9 +93,17 @@ function _getSorting (lat, lng) {
     // The `lng` delta is scaled due to longitude degrees
     // having unequal spacing depending on the distance from
     // the equator.
-    select: db.raw(`(${Location.TABLE}.lat - ${lat}) * (${Location.TABLE}.lat - ${lat}) + ` +
+    select: db.raw(`${LATITUDE_DEGREE_LENGTH} * ${LATITUDE_DEGREE_LENGTH} * ` +
+      `(${Location.TABLE}.lat - ${lat}) * (${Location.TABLE}.lat - ${lat}) + ` +
+      `${LONGITUDE_DEGREE_LENGTH_EQUATOR} * ${LONGITUDE_DEGREE_LENGTH_EQUATOR} * ` +
       `${scaleSquared} * (${Location.TABLE}.lng - ${lng}) * (${Location.TABLE}.lng - ${lng}) ` +
       'as location_distance'),
+    // Convert sorting criterium (location_distance) to
+    // something comprehensible, in this case to distance in
+    // kilometers.
+    computeScore: (sortingCriterium) => {
+      return Math.sqrt(sortingCriterium);
+    },
   };
 };
 
