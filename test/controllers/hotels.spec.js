@@ -83,12 +83,57 @@ describe('controllers - hotels', function () {
         .end(async (err, res) => {
           if (err) return done(err);
           try {
-            assert.deepEqual(res.body, {
-              items: [
-                { id: '0xdummy2', name: 'dummy2' },
-                { id: '0xdummy1', name: 'dummy1' },
-              ],
-            });
+            assert.property(res.body, 'sortingScores');
+            assert.equal(res.body.sortingScores.length, 2);
+            assert.property(res.body.sortingScores[0], 'id');
+            assert.property(res.body.sortingScores[0], 'score');
+            assert.property(res.body.sortingScores[0].score, 'name');
+            assert.property(res.body.sortingScores[0].score, 'value');
+            assert.property(res.body, 'items');
+            assert.deepEqual(res.body.items, [
+              { id: '0xdummy2', name: 'dummy2' },
+              { id: '0xdummy1', name: 'dummy1' },
+            ]);
+            done();
+          } catch (err) {
+            done(err);
+          }
+        });
+    });
+
+    it('should preserve filtering and sorting criteria in pagination', (done) => {
+      request(server)
+        .get('/hotels?location=40.5,10:120&sortByDistance=50,10&limit=1')
+        .expect(200)
+        .expect('content-type', /application\/json/)
+        .end(async (err, res) => {
+          if (err) return done(err);
+          try {
+            assert.property(res.body, 'items');
+            assert.deepEqual(res.body.items, [
+              { id: '0xdummy2', name: 'dummy2' },
+            ]);
+            assert.equal(res.body.next, 'http://localhost:1918/hotels?location=40.5,10:120&sortByDistance=50,10&limit=1&startWith=0xdummy1');
+            done();
+          } catch (err) {
+            done(err);
+          }
+        });
+    });
+
+    it('should filter out unknown attributes for pagination', (done) => {
+      request(server)
+        .get('/hotels?location=40.5,10:120&randomized=50,10&limit=1')
+        .expect(200)
+        .expect('content-type', /application\/json/)
+        .end(async (err, res) => {
+          if (err) return done(err);
+          try {
+            assert.property(res.body, 'items');
+            assert.deepEqual(res.body.items, [
+              { id: '0xdummy1', name: 'dummy1' },
+            ]);
+            assert.equal(res.body.next, 'http://localhost:1918/hotels?location=40.5,10:120&limit=1&startWith=0xdummy2');
             done();
           } catch (err) {
             done(err);
