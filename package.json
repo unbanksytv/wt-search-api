@@ -9,6 +9,7 @@
     "test-watch": "WT_CONFIG=test ./node_modules/mocha/bin/mocha --recursive --timeout 20000 --watch",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "start": "node src/index.js",
+    "docker-start": "npm run createdb && npm start",
     "dev": "WT_CONFIG=dev node src/index.js",
     "createdb-dev": "WT_CONFIG=dev node management/createdb.js",
     "createdb": "node management/createdb.js",
