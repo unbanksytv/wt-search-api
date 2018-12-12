@@ -51,6 +51,7 @@ $ docker run -p 8080:1918 -e WT_CONFIG=playground -e WT_READ_API_URL=https://pla
 - After that you can access the wt-search-api on local port `8080`.
 - This deployment is using a Ropsten configuration that can be found in `src/config/playground.js`.
 - This docker creates a database during image startup. That is pinned to SQLite for now.
+You can skip this with `SKIP_DB_SETUP` environment variable.
 
 ## Examples
 
