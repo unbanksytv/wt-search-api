@@ -29,11 +29,11 @@ TASK_DEF="[{\"portMappings\": [{\"hostPort\": 0,\"protocol\": \"tcp\",\"containe
         \"value\": \"$WT_CONFIG\"
       },
       {
-        \"name\": \"WT_API_BASE_URL\",
+        \"name\": \"BASE_URL\",
         \"value\": \"https://$WT_CONFIG-search-api.windingtree.com\"
       },
       {
-        \"name\": \"WT_READ_API_URL\",
+        \"name\": \"READ_API_URL\",
         \"value\": \"https://$WT_CONFIG-api.windingtree.com\"
       }
     ],

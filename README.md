@@ -46,7 +46,7 @@ data immediately.
 - You can use it in your local environment by running the following commands:
 ```sh
 $ docker build -t windingtree/wt-search-api .
-$ docker run -p 8080:1918 -e WT_CONFIG=playground -e WT_READ_API_URL=https://playground-api.windingtree.com -e WT_BASE_API_URL=http://localhost:8080 windingtree/wt-search-api
+$ docker run -p 8080:1918 -e WT_CONFIG=playground -e READ_API_URL=https://playground-api.windingtree.com -e BASE_URL=http://localhost:8080 windingtree/wt-search-api
 ```
 - After that you can access the wt-search-api on local port `8080`.
 - This deployment is using a Ropsten configuration that can be found in `src/config/playground.js`.
