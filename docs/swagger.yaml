@@ -64,7 +64,7 @@ paths:
                     type: array
                     description: List of resolved hotels.
                     items:
-                      $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/3e9f47badeb20d4cf1082e787952ccc4da714e16/docs/swagger.yaml#/components/schemas/HotelListItem
+                      $ref: https://raw.githubusercontent.com/windingtree/wt-read-api/1f4a610e11b9fc753f890baa32719f2f4ee4e550/docs/swagger.yaml#/components/schemas/HotelListItem
                   sortingScores:
                     type: array
                     description: List of item scores used for sorting (if applicable).
@@ -75,7 +75,7 @@ paths:
                         - score
                       properties:
                         id:
-                          $ref: https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/EthereumAddressType
+                          $ref: https://raw.githubusercontent.com/windingtree/wiki/1b7bd3e03f88fdfce6d2f0cf27059caf889eb036/hotel-data-swagger.yaml#/components/schemas/EthereumAddressType
                         score:
                           type: object
                           required:
@@ -93,7 +93,7 @@ paths:
                       Uri to next page of records. When there's no next page,
                       this is not set.
                     $ref: >-
-                      https://raw.githubusercontent.com/windingtree/wiki/d0d0b570e5c449e347ed99eb1650b73cec120789/hotel-data-swagger.yaml#/components/schemas/UriType
+                      https://raw.githubusercontent.com/windingtree/wiki/1b7bd3e03f88fdfce6d2f0cf27059caf889eb036/hotel-data-swagger.yaml#/components/schemas/UriType
         '400':
           $ref: '#/components/responses/BadRequestError'
   '/notifications/{subscription_token}':
@@ -111,7 +111,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: 'https://raw.githubusercontent.com/windingtree/wt-update-api/baa3df84b495895203f116710d5f0291c5370693/docs/swagger.yaml#/components/schemas/Notification'
+              $ref: 'https://raw.githubusercontent.com/windingtree/wt-notification-api/v0.2.0/docs/swagger.yaml#/components/schemas/Notification'
       responses:
         '200':
           description: Notification has been accepted.

@@ -301,7 +301,7 @@ describe('services.crawler.fetcher', () => {
           descriptionUri: 'https://jirkachadima.cz/wt/http/description.json',
           ratePlansUri: 'https://jirkachadima.cz/wt/http/rate-plans.json',
           availabilityUri: 'https://jirkachadima.cz/wt/http/availability.json',
-          dataFormatVersion: '0.1.0',
+          dataFormatVersion: '0.2.0',
         });
       const result = await fetcher.fetchMeta(hotelAddress);
       assert.equal(result.address, '0xc2954b66EB27A20c936A3D8F2365FE9349472663');
@@ -309,7 +309,7 @@ describe('services.crawler.fetcher', () => {
       assert.equal(result.descriptionUri, 'https://jirkachadima.cz/wt/http/description.json');
       assert.equal(result.ratePlansUri, 'https://jirkachadima.cz/wt/http/rate-plans.json');
       assert.equal(result.availabilityUri, 'https://jirkachadima.cz/wt/http/availability.json');
-      assert.equal(result.dataFormatVersion, '0.1.0');
+      assert.equal(result.dataFormatVersion, '0.2.0');
     });
 
     it('should throw when hotelAddress is not passed', async () => {
