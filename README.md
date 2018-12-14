@@ -45,11 +45,13 @@ data immediately.
 - For our deployment on https://playground-api.windingtree.com, we use a Docker image.
 - You can use it in your local environment by running the following commands:
 ```sh
-$ docker build --build-arg WT_CONFIG=playground -t windingtree/wt-search-api .
-$ docker run -p 8080:1918 -e WT_CONFIG=playground -e WT_READ_API_URL=https://playground-api.windingtree.com -e WT_BASE_API_URL=http://localhost:8080 windingtree/wt-search-api
+$ docker build -t windingtree/wt-search-api .
+$ docker run -p 8080:1918 -e WT_CONFIG=playground -e READ_API_URL=https://playground-api.windingtree.com -e BASE_URL=http://localhost:8080 windingtree/wt-search-api
 ```
-- After that you can access the wt-search-api on local port `8080`
-- This deployment is using a Ropsten configuration that can be found in `src/config/playground.js`
+- After that you can access the wt-search-api on local port `8080`.
+- This deployment is using a Ropsten configuration that can be found in `src/config/playground.js`.
+- This docker creates a database during image startup. That is pinned to SQLite for now.
+You can skip this with `SKIP_DB_SETUP` environment variable.
 
 ## Examples
 

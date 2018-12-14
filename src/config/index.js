@@ -4,8 +4,8 @@ const env = process.env.WT_CONFIG || 'dev';
 
 module.exports = Object.assign({
   port: 1918,
-  baseUrl: process.env.WT_API_BASE_URL || 'http://localhost:1918',
-  readApiUrl: process.env.WT_READ_API_URL || 'http://localhost:3000',
+  baseUrl: process.env.BASE_URL || 'http://localhost:1918',
+  readApiUrl: process.env.READ_API_URL || 'http://localhost:3000',
   logger: winston.createLogger({
     level: 'info',
     transports: [
